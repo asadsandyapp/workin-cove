@@ -39,7 +39,7 @@ export default async function UsersPage() {
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-        <div className="overflow-hidden rounded-lg border bg-white">
+        <div className="data-table-wrap">
           <table className="min-w-full text-sm">
             <thead className="bg-stone-50 text-left text-stone-500">
               <tr>

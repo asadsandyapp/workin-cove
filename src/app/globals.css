@@ -3,12 +3,22 @@
 @tailwind utilities;
 
 :root {
-  --background: #f1f5f9;
-  --foreground: #0f172a;
-  --brand: #0f766e;
-  --brand-accent: #0d9488;
+  --canvas: #e7eef0;
+  --canvas-deep: #d7e4e7;
+  --ink: #0c1f24;
+  --ink-soft: #3d5560;
+  --brand: #0f6f68;
+  --brand-strong: #0a524d;
+  --brand-soft: #d7f0ec;
   --surface: #ffffff;
-  --muted: #64748b;
+  --surface-muted: #f4f8f9;
+  --line: #c9d7dc;
+  --line-soft: #e2ebef;
+  --warn: #b45309;
+  --danger: #b91c1c;
+  --ok: #047857;
+  --radius: 14px;
+  --shadow-soft: 0 1px 2px rgba(12, 31, 36, 0.04), 0 8px 24px rgba(12, 31, 36, 0.04);
 }
 
 html,
@@ -18,11 +28,74 @@ body {
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: var(--ink);
+  background: var(--canvas);
   font-family: var(--font-body), "Segoe UI", sans-serif;
 }
 
 .font-display {
   font-family: var(--font-display), Georgia, serif;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.45s ease-out both;
+}
+
+.animate-fade-up-delay {
+  animation: fade-up 0.55s ease-out 0.08s both;
+}
+
+@layer components {
+  .app-canvas {
+    background:
+      radial-gradient(ellipse 80% 50% at 100% -10%, rgba(15, 111, 104, 0.12), transparent 55%),
+      radial-gradient(ellipse 60% 40% at -10% 20%, rgba(15, 111, 104, 0.08), transparent 50%),
+      linear-gradient(180deg, #eef5f6 0%, var(--canvas) 40%, #e4ecee 100%);
+  }
+
+  .surface-card {
+    @apply rounded-[14px] border border-[var(--line-soft)] bg-white;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .form-panel {
+    @apply space-y-6 rounded-[14px] border border-[var(--line-soft)] bg-white p-6 sm:p-8;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .form-section {
+    @apply space-y-3 border-t border-[var(--line-soft)] pt-6 first:border-t-0 first:pt-0;
+  }
+
+  .form-section-title {
+    @apply font-display text-lg font-semibold tracking-tight text-[var(--ink)];
+  }
+
+  .form-section-help {
+    @apply text-sm text-[var(--ink-soft)];
+  }
+
+  .data-table-wrap {
+    @apply overflow-hidden rounded-[14px] border border-[var(--line-soft)] bg-white;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .field-label {
+    @apply text-sm font-medium text-[var(--ink)];
+  }
+
+  .soft-chip {
+    @apply inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium;
+  }
 }

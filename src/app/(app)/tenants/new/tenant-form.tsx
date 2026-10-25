@@ -16,22 +16,24 @@ export function TenantForm({ contacts }: { contacts: ContactOption[] }) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+      <div className="rounded-xl border border-amber-200/80 bg-amber-50 px-4 py-3 text-sm text-amber-950">
         Tip: prefer{" "}
-        <Link href="/leases/new" className="font-medium underline">
+        <Link href="/leases/new" className="font-semibold underline">
           New lease
         </Link>{" "}
         — one screen for property + person + rent.
       </div>
 
-      <form action={createTenant} className="space-y-4 rounded-lg border border-slate-200 bg-white p-6">
+      <form action={createTenant} className="form-panel">
         <input type="hidden" name="tenantMode" value={mode} />
-        <div className="flex rounded-md border border-slate-200 p-0.5 text-xs">
+        <div className="flex rounded-lg border border-[var(--line)] bg-[var(--surface-muted)] p-1 text-xs font-medium">
           <button
             type="button"
             onClick={() => setMode("new")}
-            className={`rounded px-3 py-1.5 ${
-              mode === "new" ? "bg-slate-900 text-white" : "text-slate-600"
+            className={`rounded-md px-3 py-1.5 transition ${
+              mode === "new"
+                ? "bg-[var(--ink)] text-white"
+                : "text-[var(--ink-soft)] hover:text-[var(--ink)]"
             }`}
           >
             New person
@@ -39,8 +41,10 @@ export function TenantForm({ contacts }: { contacts: ContactOption[] }) {
           <button
             type="button"
             onClick={() => setMode("existing")}
-            className={`rounded px-3 py-1.5 ${
-              mode === "existing" ? "bg-slate-900 text-white" : "text-slate-600"
+            className={`rounded-md px-3 py-1.5 transition ${
+              mode === "existing"
+                ? "bg-[var(--ink)] text-white"
+                : "text-[var(--ink-soft)] hover:text-[var(--ink)]"
             }`}
             disabled={!contacts.length}
           >
@@ -49,7 +53,7 @@ export function TenantForm({ contacts }: { contacts: ContactOption[] }) {
         </div>
 
         {mode === "new" ? (
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5 sm:col-span-2">
               <Label htmlFor="firstName">First name</Label>
               <Input id="firstName" name="firstName" required={mode === "new"} />
@@ -92,7 +96,9 @@ export function TenantForm({ contacts }: { contacts: ContactOption[] }) {
           <Label htmlFor="notes">Notes (optional)</Label>
           <Textarea id="notes" name="notes" rows={2} placeholder="Notes" />
         </div>
-        <Button type="submit">Save tenant</Button>
+        <Button type="submit" size="lg">
+          Save tenant
+        </Button>
       </form>
     </div>
   );

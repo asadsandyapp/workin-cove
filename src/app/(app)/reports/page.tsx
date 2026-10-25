@@ -65,16 +65,59 @@ export default async function ReportsPage() {
   const sourceMax = Math.max(1, ...leadsBySource.map((r) => r._count._all));
   const stageMax = Math.max(1, ...stages.map((s) => s._count.deals));
 
+  const openDealValue = dealsByStatus.find((d) => d.status === "OPEN")?._sum.value ?? 0;
+  const openDealCount = dealsByStatus.find((d) => d.status === "OPEN")?._count._all ?? 0;
+  const leadTotal = leadsByStatus.reduce((n, r) => n + r._count._all, 0);
+
   return (
     <div className="space-y-8">
       <PageHeader
         title="Reports"
-        description="Read-only breakdowns from live data. Click any bar or row to jump into the matching filtered list."
+        description="Live breakdowns across CRM, seats, rent, and books. Click any bar or row to open the matching list."
         breadcrumbs={[
           { label: "Home", href: "/" },
           { label: "Reports" },
         ]}
       />
+
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 animate-fade-up">
+        <div className="surface-card p-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--ink-soft)]">
+            Leads
+          </p>
+          <p className="mt-2 font-display text-3xl font-semibold">{leadTotal}</p>
+          <p className="mt-1 text-sm text-[var(--ink-soft)]">Across all statuses</p>
+        </div>
+        <div className="surface-card p-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--ink-soft)]">
+            Open pipeline
+          </p>
+          <p className="mt-2 font-display text-3xl font-semibold">
+            {formatMoney(openDealValue)}
+          </p>
+          <p className="mt-1 text-sm text-[var(--ink-soft)]">{openDealCount} open deals</p>
+        </div>
+        <div className="surface-card p-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--ink-soft)]">
+            Properties
+          </p>
+          <p className="mt-2 font-display text-3xl font-semibold">
+            {propertiesByStatus.reduce((n, r) => n + r._count._all, 0)}
+          </p>
+          <p className="mt-1 text-sm text-[var(--ink-soft)]">Inventory records</p>
+        </div>
+        <div className="surface-card p-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--ink-soft)]">
+            Trial balance
+          </p>
+          <p className="mt-2 font-display text-3xl font-semibold">
+            {tb.balanced ? "OK" : "Fix"}
+          </p>
+          <p className="mt-1 text-sm text-[var(--ink-soft)]">
+            {tb.balanced ? "Books are balanced" : "Out of balance — open ledger"}
+          </p>
+        </div>
+      </section>
 
       <div className="grid gap-6 xl:grid-cols-3">
         <SectionPanel title="CRM · Lead status funnel" actionHref="/leads" actionLabel="Leads">

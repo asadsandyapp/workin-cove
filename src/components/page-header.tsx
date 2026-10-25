@@ -17,41 +17,41 @@ export function PageHeader({
   breadcrumbs?: { label: string; href?: string }[];
 }) {
   return (
-    <div className="mb-6 space-y-3">
+    <div className="mb-7 space-y-3 animate-fade-up">
       {breadcrumbs?.length ? (
-        <nav className="flex flex-wrap items-center gap-1 text-xs text-slate-500">
+        <nav className="flex flex-wrap items-center gap-1.5 text-xs text-[var(--ink-soft)]">
           {breadcrumbs.map((crumb, index) => (
-            <span key={`${crumb.label}-${index}`} className="flex items-center gap-1">
-              {index > 0 ? <span className="text-slate-300">/</span> : null}
+            <span key={`${crumb.label}-${index}`} className="flex items-center gap-1.5">
+              {index > 0 ? <span className="text-[var(--line)]">/</span> : null}
               {crumb.href ? (
-                <Link href={crumb.href} className="hover:text-teal-800">
+                <Link href={crumb.href} className="hover:text-[var(--brand)]">
                   {crumb.label}
                 </Link>
               ) : (
-                <span className="text-slate-700">{crumb.label}</span>
+                <span className="text-[var(--ink)]">{crumb.label}</span>
               )}
             </span>
           ))}
         </nav>
       ) : null}
-      <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-4 border-b border-[var(--line-soft)] pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-3xl">
           {eyebrow ? (
-            <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--brand)]">
               {eyebrow}
             </p>
           ) : null}
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-950 md:text-3xl">
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-[var(--ink)] md:text-[2.15rem] md:leading-tight">
             {title}
           </h1>
           {description ? (
-            <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
+            <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-[var(--ink-soft)]">
               {description}
             </p>
           ) : null}
         </div>
         {actionHref && actionLabel ? (
-          <Button asChild>
+          <Button asChild size="lg">
             <Link href={actionHref}>{actionLabel}</Link>
           </Button>
         ) : null}

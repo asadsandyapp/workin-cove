@@ -41,7 +41,7 @@ export default async function CompaniesPage({
           className="h-9 rounded-md border px-3 text-sm"
         />
       </form>
-      <div className="overflow-hidden rounded-lg border bg-white">
+      <div className="data-table-wrap">
         <table className="min-w-full text-sm">
           <thead className="bg-stone-50 text-left text-stone-500">
             <tr>

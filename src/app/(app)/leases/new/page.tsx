@@ -40,11 +40,11 @@ export default async function NewLeasePage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto max-w-3xl">
       <PageHeader
         eyebrow="Property"
         title="New lease"
-        description="One form: pick the property, enter the tenant person, set rent. No need to create Contact → Tenant separately."
+        description="One calm form: property, person, and rent. No Contact → Tenant chain."
         breadcrumbs={[
           { label: "Property", href: "/property" },
           { label: "Leases", href: "/leases" },

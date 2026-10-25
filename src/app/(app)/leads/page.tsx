@@ -168,7 +168,7 @@ export default async function LeadsPage({
           </button>
         </form>
       </div>
-      <div className="overflow-hidden rounded-lg border border-stone-200 bg-white">
+      <div className="data-table-wrap">
         <table className="min-w-full text-sm">
           <thead className="bg-stone-50 text-left text-stone-500">
             <tr>

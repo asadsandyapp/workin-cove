@@ -4,9 +4,9 @@ import { countTasksByViews, taskWhereForView } from "@/lib/tasks";
 import { trialBalance } from "@/lib/accounting";
 import { formatMinor } from "@/lib/money";
 import { formatMoney, fullName } from "@/lib/utils";
-import { PageHeader } from "@/components/page-header";
 import { NAV_GROUPS } from "@/lib/nav";
 import { Badge } from "@/components/ui/badge";
+import { KpiCard } from "@/components/kpi-card";
 
 function ActionRow({
   title,
@@ -22,11 +22,13 @@ function ActionRow({
   return (
     <Link
       href={href}
-      className="flex items-start justify-between gap-4 border-b border-slate-100 px-4 py-3 last:border-0 hover:bg-slate-50"
+      className="group flex items-start justify-between gap-4 border-b border-[var(--line-soft)] px-5 py-4 last:border-0 transition hover:bg-[var(--surface-muted)]"
     >
       <div>
-        <p className="text-sm font-medium text-slate-900">{title}</p>
-        <p className="mt-0.5 text-sm text-slate-600">{detail}</p>
+        <p className="text-[15px] font-semibold text-[var(--ink)] group-hover:text-[var(--brand-strong)]">
+          {title}
+        </p>
+        <p className="mt-1 text-sm text-[var(--ink-soft)]">{detail}</p>
       </div>
       <Badge
         variant={
@@ -51,6 +53,7 @@ export default async function DashboardPage() {
     tb,
     recentLeads,
     todayTasks,
+    activeSeats,
   ] = await Promise.all([
     prisma.appSettings.findUnique({ where: { id: "default" } }),
     prisma.lead.count({ where: { status: "NEW" } }),
@@ -78,22 +81,72 @@ export default async function DashboardPage() {
         orderBy: { dueAt: "asc" },
       }),
     ),
+    prisma.seatMembership.count({ where: { status: "ACTIVE" } }).catch(() => 0),
   ]);
 
   const tz = settings?.businessTimezone ?? "Asia/Karachi";
+  const urgentCount =
+    (taskCounts.overdue > 0 ? 1 : 0) +
+    (newLeads > 0 ? 1 : 0) +
+    (overdueInvoices > 0 ? 1 : 0) +
+    (tb.balanced ? 0 : 1);
 
   return (
     <div className="mx-auto max-w-6xl space-y-8">
-      <PageHeader
-        title="What should I do today?"
-        description={`This home screen lists work that needs action. Left menu groups are just folders: CRM = people & sales, Property = buildings & rent, Operations = costs & repairs, Finance = books. Click a group name for a short how-to. Timezone: ${tz}.`}
-      />
+      <section className="surface-card animate-fade-up overflow-hidden">
+        <div className="relative px-6 py-7 sm:px-8 sm:py-9">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(15,111,104,0.14),transparent_45%)]" />
+          <div className="relative">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--brand)]">
+              {settings?.companyName ?? "Workin Cove"} · Home
+            </p>
+            <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight text-[var(--ink)] md:text-4xl">
+              What should I do today?
+            </h1>
+            <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-[var(--ink-soft)]">
+              Start with the action queue. Left menu groups are folders: CRM for people & sales,
+              Property for seats & rent, Operations for costs, Finance for books. Timezone: {tz}.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <span className="soft-chip bg-[var(--brand-soft)] text-[var(--brand-strong)]">
+                {urgentCount} priority item{urgentCount === 1 ? "" : "s"}
+              </span>
+              <span className="soft-chip bg-white text-[var(--ink-soft)] ring-1 ring-[var(--line-soft)]">
+                {activeSeats} active seat membership{activeSeats === 1 ? "" : "s"}
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <section className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-        <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
-          <h2 className="text-sm font-semibold text-slate-900">Action queue</h2>
-          <p className="text-xs text-slate-500">
-            Highest priority items first. Click a row to open the right screen.
+      <section className="grid gap-4 sm:grid-cols-3 animate-fade-up-delay">
+        <KpiCard
+          label="Open pipeline"
+          value={formatMoney(dealValue._sum.value ?? 0)}
+          hint={`${openDeals} open deals`}
+          href="/deals"
+        />
+        <KpiCard
+          label="Task load"
+          value={String(taskCounts.open)}
+          hint={`${taskCounts.unscheduled} unscheduled · ${taskCounts.next7} next 7 days`}
+          href="/tasks?view=open"
+          tone={taskCounts.overdue > 0 ? "warning" : "default"}
+        />
+        <KpiCard
+          label="Books"
+          value={tb.balanced ? "Balanced" : "Fix now"}
+          hint={`Debits ${formatMinor(tb.totalDebit)} · Credits ${formatMinor(tb.totalCredit)}`}
+          href="/accounting"
+          tone={tb.balanced ? "success" : "danger"}
+        />
+      </section>
+
+      <section className="surface-card animate-fade-up overflow-hidden">
+        <div className="border-b border-[var(--line-soft)] bg-[var(--surface-muted)]/80 px-5 py-4">
+          <h2 className="font-display text-lg font-semibold text-[var(--ink)]">Action queue</h2>
+          <p className="mt-0.5 text-sm text-[var(--ink-soft)]">
+            Highest priority first. Click a row to open the right screen.
           </p>
         </div>
         <div>
@@ -127,65 +180,23 @@ export default async function DashboardPage() {
             href="/maintenance"
             urgency={openWorkOrders > 0 ? "normal" : "done"}
           />
-          <ActionRow
-            title={`Books are ${tb.balanced ? "balanced" : "out of balance"}`}
-            detail={`Debits ${formatMinor(tb.totalDebit)} · Credits ${formatMinor(tb.totalCredit)}`}
-            href="/accounting"
-            urgency={tb.balanced ? "done" : "high"}
-          />
-        </div>
-      </section>
-
-      <section className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Open pipeline
-          </p>
-          <p className="mt-2 text-2xl font-semibold text-slate-950">
-            {formatMoney(dealValue._sum.value ?? 0)}
-          </p>
-          <p className="mt-1 text-sm text-slate-600">{openDeals} open deals</p>
-          <Link href="/deals" className="mt-3 inline-block text-sm text-teal-800 hover:underline">
-            Open deals →
-          </Link>
-        </div>
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Task load
-          </p>
-          <p className="mt-2 text-2xl font-semibold text-slate-950">{taskCounts.open}</p>
-          <p className="mt-1 text-sm text-slate-600">
-            {taskCounts.unscheduled} unscheduled · {taskCounts.next7} in next 7 days
-          </p>
-          <Link href="/tasks?view=open" className="mt-3 inline-block text-sm text-teal-800 hover:underline">
-            Open tasks →
-          </Link>
-        </div>
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Need help finding a screen?
-          </p>
-          <p className="mt-2 text-sm text-slate-700">
-            Click a group title on the left (CRM, Property, Operations, Finance, Admin) for a short guide.
-          </p>
-          <Link href="/crm" className="mt-3 inline-block text-sm text-teal-800 hover:underline">
-            Open CRM guide →
-          </Link>
         </div>
       </section>
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold text-slate-900">Browse by module</h2>
+        <h2 className="mb-3 font-display text-lg font-semibold text-[var(--ink)]">
+          Browse by module
+        </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {NAV_GROUPS.map((group) => (
             <Link
               key={group.id}
               href={group.href}
-              className="rounded-lg border border-slate-200 bg-white p-4 hover:border-slate-300 hover:shadow-sm"
+              className="surface-card p-5 transition hover:-translate-y-0.5 hover:border-[var(--brand)]/35"
             >
-              <p className="font-medium text-slate-900">{group.label}</p>
-              <p className="mt-1 text-sm text-slate-600">{group.blurb}</p>
-              <p className="mt-3 text-xs text-slate-500">
+              <p className="font-semibold text-[var(--ink)]">{group.label}</p>
+              <p className="mt-1.5 text-sm text-[var(--ink-soft)]">{group.blurb}</p>
+              <p className="mt-4 text-xs text-[var(--ink-soft)]">
                 {group.items.map((i) => i.label).join(" · ")}
               </p>
             </Link>
@@ -194,49 +205,49 @@ export default async function DashboardPage() {
       </section>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <section className="rounded-lg border border-slate-200 bg-white">
-          <div className="border-b border-slate-100 px-4 py-3">
-            <h2 className="text-sm font-semibold">New leads to review</h2>
+        <section className="surface-card overflow-hidden">
+          <div className="border-b border-[var(--line-soft)] px-5 py-4">
+            <h2 className="font-display text-base font-semibold">New leads to review</h2>
           </div>
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-[var(--line-soft)]">
             {recentLeads.map((lead) => (
               <Link
                 key={lead.id}
                 href={`/leads/${lead.id}`}
-                className="flex items-center justify-between px-4 py-3 text-sm hover:bg-slate-50"
+                className="flex items-center justify-between px-5 py-3.5 text-sm hover:bg-[var(--surface-muted)]"
               >
-                <span className="font-medium text-slate-900">
+                <span className="font-medium text-[var(--ink)]">
                   {fullName(lead.firstName, lead.lastName)}
                 </span>
-                <span className="text-xs text-slate-500">{lead.source}</span>
+                <span className="text-xs text-[var(--ink-soft)]">{lead.source}</span>
               </Link>
             ))}
             {!recentLeads.length ? (
-              <p className="px-4 py-6 text-sm text-slate-500">No new leads.</p>
+              <p className="px-5 py-8 text-sm text-[var(--ink-soft)]">No new leads.</p>
             ) : null}
           </div>
         </section>
 
-        <section className="rounded-lg border border-slate-200 bg-white">
-          <div className="border-b border-slate-100 px-4 py-3">
-            <h2 className="text-sm font-semibold">Today&apos;s tasks</h2>
+        <section className="surface-card overflow-hidden">
+          <div className="border-b border-[var(--line-soft)] px-5 py-4">
+            <h2 className="font-display text-base font-semibold">Today&apos;s tasks</h2>
           </div>
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-[var(--line-soft)]">
             {todayTasks.map((task) => (
               <Link
                 key={task.id}
                 href="/tasks?view=today"
-                className="block px-4 py-3 text-sm hover:bg-slate-50"
+                className="block px-5 py-3.5 text-sm hover:bg-[var(--surface-muted)]"
               >
-                <p className="font-medium text-slate-900">{task.title}</p>
-                <p className="text-xs text-slate-500">
+                <p className="font-medium text-[var(--ink)]">{task.title}</p>
+                <p className="text-xs text-[var(--ink-soft)]">
                   {task.type}
                   {task.dueAt ? ` · ${task.dueAt.toLocaleString()}` : ""}
                 </p>
               </Link>
             ))}
             {!todayTasks.length ? (
-              <p className="px-4 py-6 text-sm text-slate-500">Nothing due today.</p>
+              <p className="px-5 py-8 text-sm text-[var(--ink-soft)]">Nothing due today.</p>
             ) : null}
           </div>
         </section>

@@ -13,8 +13,8 @@ const body = Source_Sans_3({
 });
 
 export const metadata: Metadata = {
-  title: "Workin Cove CRM",
-  description: "Generic workspace CRM for Workin Cove",
+  title: "Workin Cove",
+  description: "Seats, CRM, rent, and books for a single company",
 };
 
 export default function RootLayout({

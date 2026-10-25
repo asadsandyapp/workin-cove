@@ -35,7 +35,7 @@ export default async function SeatWorkspacesPage() {
         . Use seat workspaces when you sell desks by the seat.
       </div>
 
-      <div className="overflow-hidden rounded-lg border bg-white">
+      <div className="data-table-wrap">
         <table className="min-w-full text-sm">
           <thead className="bg-stone-50 text-left text-stone-500">
             <tr>

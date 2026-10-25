@@ -24,13 +24,13 @@ export function LeaseWizardForm({
   const [mode, setMode] = useState<"new" | "existing">("new");
 
   return (
-    <form action={createLease} className="space-y-6 rounded-lg border border-slate-200 bg-white p-6">
+    <form action={createLease} className="form-panel animate-fade-up">
       <input type="hidden" name="tenantMode" value={mode} />
 
-      <section className="space-y-3">
+      <section className="form-section">
         <div>
-          <h2 className="text-sm font-semibold text-slate-900">1. Property</h2>
-          <p className="text-xs text-slate-500">Which unit is being rented?</p>
+          <h2 className="form-section-title">1. Property</h2>
+          <p className="form-section-help">Which unit is being rented?</p>
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="propertyId">Property</Label>
@@ -47,20 +47,22 @@ export function LeaseWizardForm({
         </div>
       </section>
 
-      <section className="space-y-3 border-t border-slate-100 pt-5">
+      <section className="form-section">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold text-slate-900">2. Tenant</h2>
-            <p className="text-xs text-slate-500">
+            <h2 className="form-section-title">2. Tenant</h2>
+            <p className="form-section-help">
               Enter the person once — we create the CRM contact and tenant for you.
             </p>
           </div>
-          <div className="flex rounded-md border border-slate-200 p-0.5 text-xs">
+          <div className="flex rounded-lg border border-[var(--line)] bg-[var(--surface-muted)] p-1 text-xs font-medium">
             <button
               type="button"
               onClick={() => setMode("new")}
-              className={`rounded px-3 py-1.5 ${
-                mode === "new" ? "bg-slate-900 text-white" : "text-slate-600"
+              className={`rounded-md px-3 py-1.5 transition ${
+                mode === "new"
+                  ? "bg-[var(--ink)] text-white"
+                  : "text-[var(--ink-soft)] hover:text-[var(--ink)]"
               }`}
             >
               New person
@@ -68,8 +70,10 @@ export function LeaseWizardForm({
             <button
               type="button"
               onClick={() => setMode("existing")}
-              className={`rounded px-3 py-1.5 ${
-                mode === "existing" ? "bg-slate-900 text-white" : "text-slate-600"
+              className={`rounded-md px-3 py-1.5 transition ${
+                mode === "existing"
+                  ? "bg-[var(--ink)] text-white"
+                  : "text-[var(--ink-soft)] hover:text-[var(--ink)]"
               }`}
               disabled={!tenants.length}
             >
@@ -79,7 +83,7 @@ export function LeaseWizardForm({
         </div>
 
         {mode === "new" ? (
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="firstName">First name</Label>
               <Input id="firstName" name="firstName" required={mode === "new"} />
@@ -100,7 +104,12 @@ export function LeaseWizardForm({
         ) : (
           <div className="space-y-1.5">
             <Label htmlFor="tenantId">Existing tenant</Label>
-            <Select id="tenantId" name="tenantId" required={mode === "existing"} defaultValue="">
+            <Select
+              id="tenantId"
+              name="tenantId"
+              required={mode === "existing"}
+              defaultValue=""
+            >
               <option value="" disabled>
                 Select tenant
               </option>
@@ -114,12 +123,12 @@ export function LeaseWizardForm({
         )}
       </section>
 
-      <section className="space-y-3 border-t border-slate-100 pt-5">
+      <section className="form-section">
         <div>
-          <h2 className="text-sm font-semibold text-slate-900">3. Lease terms</h2>
-          <p className="text-xs text-slate-500">Rent amount and dates.</p>
+          <h2 className="form-section-title">3. Lease terms</h2>
+          <p className="form-section-help">Rent amount and dates.</p>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label htmlFor="startDate">Start date</Label>
             <Input id="startDate" name="startDate" type="date" required />
@@ -142,7 +151,14 @@ export function LeaseWizardForm({
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="dueDayOfMonth">Rent due day of month</Label>
-            <Input id="dueDayOfMonth" name="dueDayOfMonth" type="number" defaultValue={1} min={1} max={28} />
+            <Input
+              id="dueDayOfMonth"
+              name="dueDayOfMonth"
+              type="number"
+              defaultValue={1}
+              min={1}
+              max={28}
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="securityDeposit">Security deposit</Label>
@@ -172,10 +188,12 @@ export function LeaseWizardForm({
         </div>
       </section>
 
-      <div className="flex flex-wrap items-center gap-3 border-t border-slate-100 pt-5">
-        <Button type="submit">Create lease</Button>
-        <p className="text-xs text-slate-500">
-          Saves contact + tenant + lease in one step. Then you can generate the first rent invoice.
+      <div className="flex flex-wrap items-center gap-3 border-t border-[var(--line-soft)] pt-6">
+        <Button type="submit" size="lg">
+          Create lease
+        </Button>
+        <p className="text-sm text-[var(--ink-soft)]">
+          Saves contact + tenant + lease in one step. Then generate the first rent invoice.
         </p>
       </div>
     </form>
