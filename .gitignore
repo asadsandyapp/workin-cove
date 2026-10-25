@@ -49,3 +49,4 @@ yarn-error.log*
 *.db
 *.db-journal
 /data
+workin-cove-local.tar.gz
