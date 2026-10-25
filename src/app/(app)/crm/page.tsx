@@ -13,7 +13,7 @@ export default function CrmHubPage() {
         "Convert a qualified lead into a Contact (and optionally a Deal).",
         "Move Deals across pipeline stages until Won or Lost.",
         "Use Tasks for calls/meetings so nothing is missed.",
-        "Use Workspaces only to filter work by team/office — they are not properties.",
+        "Ignore Teams unless you have multiple desks — Teams live under Admin and are optional.",
       ]}
     />
   );

@@ -58,7 +58,7 @@ export default async function ContactsPage({
             <tr>
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Company</th>
-              <th className="px-4 py-3">Workspace</th>
+              <th className="px-4 py-3">Team</th>
               <th className="px-4 py-3">Flags</th>
             </tr>
           </thead>

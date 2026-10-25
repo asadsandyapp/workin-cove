@@ -11,7 +11,8 @@ export default function AdminHubPage() {
       howToUse={[
         "Set company name, timezone (Asia/Karachi by default), and lead webhooks in Settings.",
         "Configure pipelines, tags, and custom fields under Settings tabs.",
-        "Integrations map shows how specialized modules share CRM contacts/records.",
+        "Teams are optional desk labels for CRM — skip them if one person handles everything.",
+        "Integrations map shows how Property/Finance screens share CRM people records.",
       ]}
     />
   );

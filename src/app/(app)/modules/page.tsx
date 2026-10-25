@@ -8,7 +8,7 @@ const MODULES = [
     key: "properties",
     href: "/properties",
     title: "Property inventory",
-    blurb: "Company-owned portfolio — separate from CRM workspaces.",
+    blurb: "Company-owned portfolio — separate from optional CRM teams.",
   },
   {
     key: "tenants",

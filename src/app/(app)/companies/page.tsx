@@ -47,7 +47,7 @@ export default async function CompaniesPage({
             <tr>
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Industry</th>
-              <th className="px-4 py-3">Workspace</th>
+              <th className="px-4 py-3">Team</th>
               <th className="px-4 py-3">Links</th>
             </tr>
           </thead>

@@ -86,7 +86,7 @@ export default async function DashboardPage() {
     <div className="mx-auto max-w-6xl space-y-8">
       <PageHeader
         title="What should I do today?"
-        description={`This home screen lists work that needs action. Use the left menu groups (CRM, Property, Operations, Finance) — click a group name for a plain-English overview. Timezone: ${tz}.`}
+        description={`This home screen lists work that needs action. Left menu groups are just folders: CRM = people & sales, Property = buildings & rent, Operations = costs & repairs, Finance = books. Click a group name for a short how-to. Timezone: ${tz}.`}
       />
 
       <section className="overflow-hidden rounded-lg border border-slate-200 bg-white">

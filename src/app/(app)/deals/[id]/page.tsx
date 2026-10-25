@@ -58,7 +58,7 @@ export default async function DealDetailPage({
             </p>
             <p>Contact: {deal.contact ? `${deal.contact.firstName}` : "—"}</p>
             <p>Company: {deal.company?.name || "—"}</p>
-            <p>Workspace: {deal.workspace?.name || "—"}</p>
+            <p>Team: {deal.workspace?.name || "—"}</p>
           </CardContent>
         </Card>
         <Card>

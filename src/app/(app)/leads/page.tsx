@@ -95,7 +95,7 @@ export default async function LeadsPage({
             defaultValue={params.workspaceId || ""}
             className="h-9 rounded-md border border-stone-300 px-2 text-sm"
           >
-            <option value="">All workspaces</option>
+            <option value="">All teams</option>
             {workspaces.map((w) => (
               <option key={w.id} value={w.id}>
                 {w.name}
@@ -114,7 +114,7 @@ export default async function LeadsPage({
               <th className="px-4 py-3 font-medium">Name</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Source</th>
-              <th className="px-4 py-3 font-medium">Workspace</th>
+              <th className="px-4 py-3 font-medium">Team</th>
               <th className="px-4 py-3 font-medium">Tags</th>
             </tr>
           </thead>

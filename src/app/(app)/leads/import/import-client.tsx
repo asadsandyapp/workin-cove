@@ -177,7 +177,7 @@ export function LeadImportClient({
               </div>
             ))}
             <div className="space-y-1.5">
-              <Label>Workspace (optional)</Label>
+              <Label>Team (optional)</Label>
               <Select
                 value={workspaceId}
                 onChange={(e) => setWorkspaceId(e.target.value)}

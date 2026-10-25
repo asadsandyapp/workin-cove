@@ -86,7 +86,7 @@ export default async function NewDealPage() {
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label>Workspace</Label>
+            <Label>Team (optional)</Label>
             <Select name="workspaceId" defaultValue="">
               <option value="">None</option>
               {workspaces.map((w) => (

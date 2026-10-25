@@ -25,8 +25,17 @@ export default async function WorkspaceDetailPage({
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Admin · team"
         title={workspace.name}
-        description={workspace.description || "Operational workspace"}
+        description={
+          workspace.description ||
+          "CRM desk label — leads, contacts, deals, and tasks tagged to this team."
+        }
+        breadcrumbs={[
+          { label: "Admin", href: "/admin" },
+          { label: "Teams", href: "/workspaces" },
+          { label: workspace.name },
+        ]}
       />
       <div className="grid gap-4 md:grid-cols-2">
         <Card>

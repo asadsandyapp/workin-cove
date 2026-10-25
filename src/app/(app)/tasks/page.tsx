@@ -176,7 +176,7 @@ export default async function TasksPage({
           </Select>
           <Input name="dueAt" type="datetime-local" />
           <Select name="workspaceId" defaultValue="">
-            <option value="">Workspace</option>
+            <option value="">Team (optional)</option>
             {workspaces.map((w) => (
               <option key={w.id} value={w.id}>
                 {w.name}

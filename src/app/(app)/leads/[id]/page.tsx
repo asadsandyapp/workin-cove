@@ -112,7 +112,7 @@ export default async function LeadDetailPage({
                   <Input name="campaign" defaultValue={lead.campaign || ""} />
                 </div>
                 <div className="space-y-1.5 sm:col-span-2">
-                  <Label>Workspace</Label>
+                  <Label>Team (optional)</Label>
                   <Select name="workspaceId" defaultValue={lead.workspaceId || ""}>
                     <option value="">None</option>
                     {workspaces.map((w) => (

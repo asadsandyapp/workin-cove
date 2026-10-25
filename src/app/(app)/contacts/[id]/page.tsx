@@ -52,7 +52,7 @@ export default async function ContactDetailPage({
           <CardContent className="space-y-2 text-sm">
             <p>Email: {contact.email || "—"}</p>
             <p>Phone: {contact.phone || "—"}</p>
-            <p>Workspace: {contact.workspace?.name || "—"}</p>
+            <p>Team: {contact.workspace?.name || "—"}</p>
             {contact.convertedFromLead ? (
               <p>
                 Converted from{" "}

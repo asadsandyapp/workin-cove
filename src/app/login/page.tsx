@@ -19,7 +19,7 @@ export default async function LoginPage({
           Workin Cove
         </p>
         <p className="mt-2 text-sm text-stone-600">
-          Sign in to the workspace CRM. Single-company Admin demo.
+          Sign in to Workin Cove. Single-company Admin demo.
         </p>
         <LoginForm nextPath={params.next || "/"} error={params.error} />
         <p className="mt-6 text-xs text-stone-500">

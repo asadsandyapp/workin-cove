@@ -69,7 +69,7 @@ export default async function NewLeadPage() {
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="workspaceId">Workspace</Label>
+            <Label htmlFor="workspaceId">Team (optional)</Label>
             <Select id="workspaceId" name="workspaceId" defaultValue="">
               <option value="">None</option>
               {workspaces.map((w) => (

@@ -16,7 +16,7 @@ export default async function PropertiesPage() {
       <PageHeader
         eyebrow="Property"
         title="Property inventory"
-        description="Buildings and units the company owns. This is separate from CRM Workspaces (those are teams/offices for filtering)."
+        description="Buildings and units the company owns. (Admin → Teams is unrelated — that is only an optional CRM desk label.)"
         actionHref="/properties/new"
         actionLabel="Add property"
         breadcrumbs={[

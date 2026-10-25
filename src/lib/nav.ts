@@ -33,11 +33,6 @@ export const NAV_GROUPS: NavGroup[] = [
     blurb: "Find, track, and close customer relationships",
     items: [
       {
-        href: "/workspaces",
-        label: "Workspaces",
-        blurb: "Business units / teams used to filter CRM work",
-      },
-      {
         href: "/leads",
         label: "Leads",
         blurb: "New inquiries before they become customers",
@@ -138,6 +133,11 @@ export const NAV_GROUPS: NavGroup[] = [
         href: "/settings",
         label: "Settings",
         blurb: "Timezone, pipelines, tags, webhooks",
+      },
+      {
+        href: "/workspaces",
+        label: "Teams (optional)",
+        blurb: "Skip unless you split CRM work across desks",
       },
       {
         href: "/modules",
