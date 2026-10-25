@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import { isAdmin, requireUser } from "@/lib/auth";
+import { leadScopeWhere } from "@/lib/leads-access";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { fullName } from "@/lib/utils";
@@ -12,34 +14,63 @@ export default async function LeadsPage({
     source?: string;
     q?: string;
     workspaceId?: string;
+    assigneeId?: string;
+    mine?: string;
   }>;
 }) {
+  const user = await requireUser();
   const params = await searchParams;
+  const scope = isAdmin(user)
+    ? params.mine === "1"
+      ? { assigneeId: user.id }
+      : params.assigneeId
+        ? {
+            assigneeId:
+              params.assigneeId === "unassigned" ? null : params.assigneeId,
+          }
+        : {}
+    : leadScopeWhere(user);
+
   const where = {
-    ...(params.status ? { status: params.status } : {}),
-    ...(params.source ? { source: params.source } : {}),
-    ...(params.workspaceId ? { workspaceId: params.workspaceId } : {}),
-    ...(params.q
-      ? {
-          OR: [
-            { firstName: { contains: params.q } },
-            { lastName: { contains: params.q } },
-            { email: { contains: params.q } },
-            { phone: { contains: params.q } },
-            { companyName: { contains: params.q } },
-          ],
-        }
-      : {}),
+    AND: [
+      scope,
+      ...(params.status ? [{ status: params.status }] : []),
+      ...(params.source ? [{ source: params.source }] : []),
+      ...(params.workspaceId ? [{ workspaceId: params.workspaceId }] : []),
+      ...(params.q
+        ? [
+            {
+              OR: [
+                { firstName: { contains: params.q } },
+                { lastName: { contains: params.q } },
+                { email: { contains: params.q } },
+                { phone: { contains: params.q } },
+                { companyName: { contains: params.q } },
+              ],
+            },
+          ]
+        : []),
+    ],
   };
 
-  const [leads, workspaces] = await Promise.all([
+  const [leads, workspaces, users] = await Promise.all([
     prisma.lead.findMany({
       where,
       orderBy: { updatedAt: "desc" },
-      include: { workspace: true, tags: { include: { tag: true } } },
+      include: {
+        workspace: true,
+        assignee: true,
+        tags: { include: { tag: true } },
+      },
       take: 200,
     }),
     prisma.workspace.findMany({ orderBy: { name: "asc" } }),
+    isAdmin(user)
+      ? prisma.user.findMany({
+          where: { status: "ACTIVE" },
+          orderBy: { name: "asc" },
+        })
+      : Promise.resolve([]),
   ]);
 
   return (
@@ -47,7 +78,11 @@ export default async function LeadsPage({
       <PageHeader
         eyebrow="CRM"
         title="Leads"
-        description="New inquiries before they become customers. Create manually, import a spreadsheet, or receive Meta/Google Ads webhooks."
+        description={
+          isAdmin(user)
+            ? "Assign each lead to a user. Agents only see their own leads plus the unassigned pool."
+            : "Your assigned leads and the unassigned pool. Claim a lead by opening it and saving (you become owner)."
+        }
         actionHref="/leads/new"
         actionLabel="New lead"
         breadcrumbs={[
@@ -58,6 +93,17 @@ export default async function LeadsPage({
       <div className="mb-4 flex flex-wrap gap-2">
         <Link href="/leads/import" className="rounded-md border px-3 py-1.5 text-sm hover:bg-white">
           Import CSV/Excel
+        </Link>
+        {isAdmin(user) ? (
+          <Link
+            href="/leads?mine=1"
+            className="rounded-md border px-3 py-1.5 text-sm hover:bg-white"
+          >
+            My leads
+          </Link>
+        ) : null}
+        <Link href="/leads" className="rounded-md border px-3 py-1.5 text-sm hover:bg-white">
+          {isAdmin(user) ? "All leads" : "My + unassigned"}
         </Link>
         <form className="flex flex-wrap gap-2">
           <input
@@ -90,12 +136,27 @@ export default async function LeadsPage({
               </option>
             ))}
           </select>
+          {isAdmin(user) ? (
+            <select
+              name="assigneeId"
+              defaultValue={params.assigneeId || ""}
+              className="h-9 rounded-md border border-stone-300 px-2 text-sm"
+            >
+              <option value="">All owners</option>
+              <option value="unassigned">Unassigned</option>
+              {users.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.name}
+                </option>
+              ))}
+            </select>
+          ) : null}
           <select
             name="workspaceId"
             defaultValue={params.workspaceId || ""}
             className="h-9 rounded-md border border-stone-300 px-2 text-sm"
           >
-            <option value="">All teams</option>
+            <option value="">All CRM desks</option>
             {workspaces.map((w) => (
               <option key={w.id} value={w.id}>
                 {w.name}
@@ -113,8 +174,8 @@ export default async function LeadsPage({
             <tr>
               <th className="px-4 py-3 font-medium">Name</th>
               <th className="px-4 py-3 font-medium">Status</th>
+              <th className="px-4 py-3 font-medium">Owner</th>
               <th className="px-4 py-3 font-medium">Source</th>
-              <th className="px-4 py-3 font-medium">Team</th>
               <th className="px-4 py-3 font-medium">Tags</th>
             </tr>
           </thead>
@@ -132,8 +193,8 @@ export default async function LeadsPage({
                 <td className="px-4 py-3">
                   <Badge>{lead.status}</Badge>
                 </td>
+                <td className="px-4 py-3">{lead.assignee?.name || "Unassigned"}</td>
                 <td className="px-4 py-3">{lead.source}</td>
-                <td className="px-4 py-3">{lead.workspace?.name || "—"}</td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap gap-1">
                     {lead.tags.map((t) => (

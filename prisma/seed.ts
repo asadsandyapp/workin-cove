@@ -92,6 +92,16 @@ async function main() {
       name: "Cove Admin",
       passwordHash,
       role: "ADMIN",
+      status: "ACTIVE",
+    },
+  });
+  const agent = await prisma.user.create({
+    data: {
+      email: "agent@workincove.local",
+      name: "Sara Agent",
+      passwordHash,
+      role: "AGENT",
+      status: "ACTIVE",
     },
   });
 
@@ -312,7 +322,7 @@ async function main() {
       source: "MANUAL",
       campaign: "Referral",
       workspaceId: services.id,
-      assigneeId: admin.id,
+      assigneeId: agent.id,
     },
   });
 
@@ -602,7 +612,32 @@ async function main() {
       status: "OCCUPIED",
       acquisitionDate: subDays(new Date(), 400),
       acquisitionCostMinor: BigInt(4_500_000_000),
-      notes: "Company-owned inventory — not a CRM workspace.",
+      notes: "Company-owned inventory — seat workspaces and unit leases attach here.",
+    },
+  });
+
+  const openDesk = await prisma.seatWorkspace.create({
+    data: {
+      name: "Clifton Open Desk",
+      code: "CLT-OPEN",
+      propertyId: property.id,
+      capacity: 24,
+      pricePerSeatMinor: BigInt(25_000_00),
+      billingCycle: "MONTHLY",
+      status: "ACTIVE",
+      description: "Hot desks for developers and freelancers — charged per seat / month.",
+    },
+  });
+
+  await prisma.seatMembership.create({
+    data: {
+      seatWorkspaceId: openDesk.id,
+      contactId: bilal.id,
+      seats: 2,
+      monthlyChargeMinor: BigInt(50_000_00),
+      startDate: subDays(new Date(), 20),
+      status: "ACTIVE",
+      notes: "Two developer desks",
     },
   });
 
@@ -779,6 +814,9 @@ async function main() {
 
   console.log("Seeded Workin Cove demo data");
   console.log("Admin login: admin@workincove.local / 1122");
+  console.log("Agent login: agent@workincove.local / 1122");
+  console.log(`Seat workspace demo: ${openDesk.name}`);
+  console.log(`Lead assigned to agent: ${leadManual.firstName} ${leadManual.lastName}`);
 }
 
 main()

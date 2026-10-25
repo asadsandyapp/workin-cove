@@ -6,13 +6,13 @@ export default function PropertyHubPage() {
   return (
     <ModuleHub
       group={group}
-      firstActionHref="/leases/new"
-      firstActionLabel="New lease"
+      firstActionHref="/seat-workspaces"
+      firstActionLabel="Seat workspaces"
       howToUse={[
-        "Add company-owned Properties first (inventory).",
-        "Use New lease — one form creates the person, tenant, and lease together (no Contact → Tenant → Lease chain).",
-        "Open the lease to generate the first rent invoice, then collect payments there.",
-        "Partial payments stay PARTIAL until the invoice balance is zero.",
+        "Add company-owned Properties (buildings) first.",
+        "Seat workspaces = paid desks charged per seat for office / developer work — this is the real workspace product.",
+        "Full-unit rentals: use New lease (creates person + tenant + lease in one step).",
+        "Open a lease to invoice and collect rent; seat members show monthly booked revenue on the seat workspace.",
       ]}
     />
   );

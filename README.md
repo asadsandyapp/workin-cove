@@ -1,6 +1,6 @@
 # Workin Cove
 
-Single-company business management application: generic workspace CRM plus property inventory, tenants/leases/rent, expenses/maintenance, sales/purchases, and integer-money accounting.
+Single-company business management app: CRM with staff users and lead assignment, property inventory, **seat workspaces** (paid desks charged per seat), unit leases/rent, expenses/maintenance, sales/purchases, and integer-money accounting.
 
 ## Quick start
 
@@ -14,6 +14,7 @@ npm run dev -- --hostname 127.0.0.1 --port 43127
 
 - App: [http://127.0.0.1:43127](http://127.0.0.1:43127)
 - Admin: `admin@workincove.local` / `1122`
+- Agent (assigned leads): `agent@workincove.local` / `1122`
 
 ## Scripts
 
@@ -37,4 +38,4 @@ npm run dev -- --hostname 127.0.0.1 --port 43127
 
 ## Architecture note
 
-CRM workspaces are operational contexts. Properties are a separate inventory module. Tenants link to shared CRM contacts; accounting posts use integer minor units only.
+**Seat workspaces** (Property) are paid desks charged per seat. **CRM desks** (Admin) are optional sales labels. **Users** (Admin) are staff logins; assign leads to agents. Tenants link to CRM contacts; money uses integer minor units only.

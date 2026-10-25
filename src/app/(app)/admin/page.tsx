@@ -6,13 +6,13 @@ export default function AdminHubPage() {
   return (
     <ModuleHub
       group={group}
-      firstActionHref="/settings"
-      firstActionLabel="Go to Settings"
+      firstActionHref="/users"
+      firstActionLabel="Manage users"
       howToUse={[
-        "Set company name, timezone (Asia/Karachi by default), and lead webhooks in Settings.",
-        "Configure pipelines, tags, and custom fields under Settings tabs.",
-        "Teams are optional desk labels for CRM — skip them if one person handles everything.",
-        "Integrations map shows how Property/Finance screens share CRM people records.",
+        "Create Agent users so staff can log in and work leads assigned to them.",
+        "Set company name, timezone (Asia/Karachi), and lead webhooks in Settings.",
+        "CRM desks (old “workspaces”) are optional internal sales labels — not paid office seats.",
+        "Paid per-seat desks live under Property → Seat workspaces.",
       ]}
     />
   );

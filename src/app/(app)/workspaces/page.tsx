@@ -17,29 +17,31 @@ export default async function WorkspacesPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Admin · optional"
-        title="Teams"
-        description="A simple label so you can group CRM leads and tasks by desk. Not a building, not a rental property, and not required."
+        title="CRM desks"
+        description="Optional internal sales labels only. Not paid office seats."
         breadcrumbs={[
           { label: "Admin", href: "/admin" },
-          { label: "Teams" },
+          { label: "CRM desks" },
         ]}
       />
 
-      <section className="rounded-lg border border-sky-200 bg-sky-50 px-5 py-4 text-sm text-sky-950">
-        <p className="font-medium">Do you need this?</p>
-        <ul className="mt-2 list-disc space-y-1 pl-5 text-sky-900">
-          <li>
-            <strong>One office / one sales person:</strong> ignore Teams. Use Leads,
-            Contacts, and Deals as usual. Leave the Team field blank on forms.
-          </li>
-          <li>
-            <strong>Several desks:</strong> create a team per desk (e.g. “Sales”,
-            “Partnerships”) so each person only sees their pile of leads and tasks.
-          </li>
-          <li>
-            <strong>Never</strong> create a team for a building or rental unit —
-            that belongs under Property → Properties.
-          </li>
+      <section className="rounded-lg border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-950">
+        <p className="font-medium">Wrong place?</p>
+        <p className="mt-1">
+          Looking for <strong>paid office / developer desks charged per seat</strong>? That is{" "}
+          <Link href="/seat-workspaces" className="font-medium underline">
+            Property → Seat workspaces
+          </Link>
+          . Looking for <strong>staff logins and lead assignment</strong>? That is{" "}
+          <Link href="/users" className="font-medium underline">
+            Admin → Users
+          </Link>
+          .
+        </p>
+        <p className="mt-3 font-medium">This page is only optional CRM sales desks</p>
+        <ul className="mt-2 list-disc space-y-1 pl-5">
+          <li>Internal labels to group leads (e.g. “Partnerships desk”).</li>
+          <li>Not a building, not a seat product, not required for most companies.</li>
         </ul>
       </section>
 

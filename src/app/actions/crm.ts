@@ -2,10 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireAdmin } from "@/lib/auth";
+import { isAdmin, requireAdmin, requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/activity";
 import { convertLeadToContact } from "@/lib/leads";
+import { assertCanAccessLead } from "@/lib/leads-access";
 import { parseJson } from "@/lib/utils";
 
 function str(formData: FormData, key: string) {
@@ -44,7 +45,11 @@ export async function upsertWorkspace(formData: FormData) {
 }
 
 export async function createLead(formData: FormData) {
-  const user = await requireAdmin();
+  const user = await requireUser();
+  const requestedAssignee = opt(formData, "assigneeId");
+  const assigneeId = isAdmin(user)
+    ? requestedAssignee || user.id
+    : user.id;
   const lead = await prisma.lead.create({
     data: {
       firstName: str(formData, "firstName"),
@@ -58,7 +63,7 @@ export async function createLead(formData: FormData) {
       campaign: opt(formData, "campaign"),
       notes: opt(formData, "notes"),
       workspaceId: opt(formData, "workspaceId"),
-      assigneeId: user.id,
+      assigneeId,
       customFieldsJson: opt(formData, "customFieldsJson") || "{}",
     },
   });
@@ -80,8 +85,17 @@ export async function createLead(formData: FormData) {
 }
 
 export async function updateLead(formData: FormData) {
-  const user = await requireAdmin();
+  const user = await requireUser();
   const id = str(formData, "id");
+  const existing = await assertCanAccessLead(user, id);
+  if (!existing) throw new Error("Lead not found or not assigned to you");
+
+  const assigneeId = isAdmin(user)
+    ? opt(formData, "assigneeId")
+    : existing.assigneeId === null
+      ? user.id
+      : existing.assigneeId;
+
   const lead = await prisma.lead.update({
     where: { id },
     data: {
@@ -96,6 +110,7 @@ export async function updateLead(formData: FormData) {
       campaign: opt(formData, "campaign"),
       notes: opt(formData, "notes"),
       workspaceId: opt(formData, "workspaceId"),
+      assigneeId,
       customFieldsJson: opt(formData, "customFieldsJson") || "{}",
     },
   });
@@ -118,8 +133,10 @@ export async function updateLead(formData: FormData) {
 }
 
 export async function convertLeadAction(formData: FormData) {
-  const user = await requireAdmin();
+  const user = await requireUser();
   const leadId = str(formData, "leadId");
+  const existing = await assertCanAccessLead(user, leadId);
+  if (!existing) throw new Error("Lead not found or not assigned to you");
   const result = await convertLeadToContact(leadId, {
     userId: user.id,
     makeCustomer: formData.get("makeCustomer") === "on",

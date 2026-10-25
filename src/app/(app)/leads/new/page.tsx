@@ -1,4 +1,5 @@
 import { createLead } from "@/app/actions/crm";
+import { isAdmin, requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -8,13 +9,17 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
 export default async function NewLeadPage() {
-  const [workspaces, tags, customFields] = await Promise.all([
+  const user = await requireUser();
+  const [workspaces, tags, customFields, users] = await Promise.all([
     prisma.workspace.findMany({ orderBy: { name: "asc" } }),
     prisma.tag.findMany({ orderBy: { name: "asc" } }),
     prisma.customFieldDefinition.findMany({
       where: { entityType: "lead" },
       orderBy: { sortOrder: "asc" },
     }),
+    isAdmin(user)
+      ? prisma.user.findMany({ where: { status: "ACTIVE" }, orderBy: { name: "asc" } })
+      : Promise.resolve([]),
   ]);
 
   return (
@@ -68,8 +73,23 @@ export default async function NewLeadPage() {
               <option value="DISQUALIFIED">DISQUALIFIED</option>
             </Select>
           </div>
+          {isAdmin(user) ? (
+            <div className="space-y-1.5">
+              <Label htmlFor="assigneeId">Owner (assigned user)</Label>
+              <Select id="assigneeId" name="assigneeId" defaultValue={user.id}>
+                <option value="">Unassigned</option>
+                {users.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name} ({u.role})
+                  </option>
+                ))}
+              </Select>
+            </div>
+          ) : (
+            <input type="hidden" name="assigneeId" value={user.id} />
+          )}
           <div className="space-y-1.5">
-            <Label htmlFor="workspaceId">Team (optional)</Label>
+            <Label htmlFor="workspaceId">CRM desk (optional)</Label>
             <Select id="workspaceId" name="workspaceId" defaultValue="">
               <option value="">None</option>
               {workspaces.map((w) => (

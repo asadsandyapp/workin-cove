@@ -9,11 +9,11 @@ export default function CrmHubPage() {
       firstActionHref="/leads"
       firstActionLabel="Go to Leads"
       howToUse={[
-        "Start with Leads for new inquiries (manual, import, or ads).",
+        "Admin creates Users (Agents), then assigns each Lead an Owner.",
+        "Agents log in and work their assigned leads (plus the unassigned pool).",
         "Convert a qualified lead into a Contact (and optionally a Deal).",
         "Move Deals across pipeline stages until Won or Lost.",
-        "Use Tasks for calls/meetings so nothing is missed.",
-        "Ignore Teams unless you have multiple desks — Teams live under Admin and are optional.",
+        "Paid office seats are under Property → Seat workspaces — not here.",
       ]}
     />
   );

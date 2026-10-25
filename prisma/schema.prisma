@@ -12,7 +12,10 @@ model User {
   email        String   @unique
   name         String
   passwordHash String
+  /// ADMIN | AGENT
   role         String   @default("ADMIN")
+  /// ACTIVE | DISABLED
+  status       String   @default("ACTIVE")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -197,6 +200,7 @@ model Contact {
   tags              ContactTag[]
   tenant            Tenant?
   propertyTransactions PropertyTransaction[]
+  seatMemberships   SeatMembership[]
 
   @@index([email])
   @@index([phone])
@@ -478,12 +482,52 @@ model Property {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  leases       Lease[]
-  expenses     Expense[]
-  workOrders   WorkOrder[]
-  transactions PropertyTransaction[]
-  documents    Document[]
-  rentInvoices RentInvoice[]
+  leases         Lease[]
+  expenses       Expense[]
+  workOrders     WorkOrder[]
+  transactions   PropertyTransaction[]
+  documents      Document[]
+  rentInvoices   RentInvoice[]
+  seatWorkspaces SeatWorkspace[]
+}
+
+/// Paid office seats (coworking / development desks). Charge per seat — not a CRM team label.
+model SeatWorkspace {
+  id                 String   @id @default(cuid())
+  name               String
+  code               String?  @unique
+  propertyId         String?
+  property           Property? @relation(fields: [propertyId], references: [id])
+  capacity           Int
+  pricePerSeatMinor  BigInt
+  billingCycle       String   @default("MONTHLY")
+  status             String   @default("ACTIVE")
+  description        String?
+  notes              String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  memberships SeatMembership[]
+}
+
+/// A person/company occupying N seats in a seat workspace and paying for them.
+model SeatMembership {
+  id                  String    @id @default(cuid())
+  seatWorkspaceId     String
+  seatWorkspace       SeatWorkspace @relation(fields: [seatWorkspaceId], references: [id], onDelete: Cascade)
+  contactId           String
+  contact             Contact   @relation(fields: [contactId], references: [id])
+  seats               Int       @default(1)
+  monthlyChargeMinor  BigInt
+  startDate           DateTime
+  endDate             DateTime?
+  status              String    @default("ACTIVE")
+  notes               String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([seatWorkspaceId, status])
+  @@index([contactId])
 }
 
 model Tenant {

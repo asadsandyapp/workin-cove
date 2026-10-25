@@ -24,6 +24,8 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   "/": Home,
   "/reports": FileBarChart2,
   "/workspaces": Building2,
+  "/seat-workspaces": Building2,
+  "/users": Users,
   "/leads": Users,
   "/contacts": ContactRound,
   "/companies": Handshake,
@@ -55,13 +57,20 @@ export function AppShell({
   children,
   companyName,
   userName,
+  userRole = "ADMIN",
+  isAdmin = true,
 }: {
   children: React.ReactNode;
   companyName: string;
   userName: string;
+  userRole?: string;
+  isAdmin?: boolean;
 }) {
   const pathname = usePathname();
   const activeGroup = findGroupForPath(pathname);
+  const navGroups = isAdmin
+    ? NAV_GROUPS
+    : NAV_GROUPS.filter((g) => g.id === "crm" || g.id === "property");
 
   return (
     <div className="min-h-screen bg-[#f1f5f9] text-slate-900">
@@ -112,7 +121,7 @@ export function AppShell({
               })}
             </div>
 
-            {NAV_GROUPS.map((group) => {
+            {navGroups.map((group) => {
               const groupActive = activeGroup?.id === group.id;
               return (
                 <div key={group.id} className="mb-5">
@@ -159,7 +168,7 @@ export function AppShell({
 
           <div className="border-t border-white/10 px-4 py-4 text-xs text-slate-400">
             <p className="font-medium text-slate-200">{userName}</p>
-            <p className="mt-0.5">Admin</p>
+            <p className="mt-0.5">{userRole === "ADMIN" ? "Admin" : "Sales agent"}</p>
             <form action="/api/auth/logout" method="post" className="mt-3">
               <button type="submit" className="text-teal-300 hover:underline">
                 Sign out
@@ -194,7 +203,7 @@ export function AppShell({
               </div>
             </div>
             <div className="flex gap-1.5 overflow-x-auto border-t border-slate-100 px-3 py-2 lg:hidden">
-              {[...TOP_NAV, ...NAV_GROUPS.flatMap((g) => [ { href: g.href, label: g.label, blurb: g.blurb }, ...g.items ])].map(
+              {[...TOP_NAV, ...navGroups.flatMap((g) => [ { href: g.href, label: g.label, blurb: g.blurb }, ...g.items ])].map(
                 (item) => (
                   <Link
                     key={`${item.href}-${item.label}`}

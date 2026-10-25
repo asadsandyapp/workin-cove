@@ -5,6 +5,7 @@ import {
   createPipeline,
   upsertPipelineStage,
 } from "@/app/actions/crm";
+import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ export default async function SettingsPage({
 }: {
   searchParams: Promise<{ tab?: string }>;
 }) {
+  await requireAdmin();
   const params = await searchParams;
   const tab = params.tab || "general";
   const [settings, fields, tags, pipelines] = await Promise.all([

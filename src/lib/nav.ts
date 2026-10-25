@@ -68,12 +68,17 @@ export const NAV_GROUPS: NavGroup[] = [
     id: "property",
     label: "Property",
     href: "/property",
-    blurb: "Company-owned assets, tenants, and rent",
+    blurb: "Buildings, paid office seats, tenants, and rent",
     items: [
       {
         href: "/properties",
         label: "Properties",
-        blurb: "Buildings / units you own (not CRM workspaces)",
+        blurb: "Buildings / floors you own",
+      },
+      {
+        href: "/seat-workspaces",
+        label: "Seat workspaces",
+        blurb: "Paid desks — charge per seat for office / developer work",
       },
       {
         href: "/tenants",
@@ -83,7 +88,7 @@ export const NAV_GROUPS: NavGroup[] = [
       {
         href: "/leases",
         label: "Leases & rent",
-        blurb: "Start here: one form for person + contract + rent",
+        blurb: "Full-unit leases (not per-seat coworking)",
       },
     ],
   },
@@ -130,14 +135,19 @@ export const NAV_GROUPS: NavGroup[] = [
     blurb: "Company setup and integrations",
     items: [
       {
+        href: "/users",
+        label: "Users",
+        blurb: "Staff logins — assign leads to agents",
+      },
+      {
         href: "/settings",
         label: "Settings",
         blurb: "Timezone, pipelines, tags, webhooks",
       },
       {
         href: "/workspaces",
-        label: "Teams (optional)",
-        blurb: "Skip unless you split CRM work across desks",
+        label: "CRM desks (optional)",
+        blurb: "Internal sales desks — not paid office seats",
       },
       {
         href: "/modules",

@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/auth";
+import { isAdmin, requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { AppShell } from "@/components/app-shell";
 
@@ -7,7 +7,7 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await requireAdmin();
+  const user = await requireUser();
   const settings = await prisma.appSettings.findUnique({
     where: { id: "default" },
   });
@@ -16,6 +16,8 @@ export default async function AppLayout({
     <AppShell
       companyName={settings?.companyName ?? "Workin Cove"}
       userName={user.name}
+      userRole={user.role}
+      isAdmin={isAdmin(user)}
     >
       {children}
     </AppShell>

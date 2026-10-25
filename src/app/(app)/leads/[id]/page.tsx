@@ -5,6 +5,8 @@ import {
   updateLead,
   addNote,
 } from "@/app/actions/crm";
+import { isAdmin, requireUser } from "@/lib/auth";
+import { assertCanAccessLead } from "@/lib/leads-access";
 import { prisma } from "@/lib/db";
 import { PageHeader } from "@/components/page-header";
 import { ActivityTimeline } from "@/components/activity-timeline";
@@ -23,12 +25,17 @@ export default async function LeadDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const user = await requireUser();
   const { id } = await params;
-  const [lead, workspaces, tags, documents] = await Promise.all([
+  const accessible = await assertCanAccessLead(user, id);
+  if (!accessible) notFound();
+
+  const [lead, workspaces, tags, documents, users] = await Promise.all([
     prisma.lead.findUnique({
       where: { id },
       include: {
         workspace: true,
+        assignee: true,
         tags: { include: { tag: true } },
         activities: { orderBy: { createdAt: "desc" }, take: 20 },
         notesList: { orderBy: { createdAt: "desc" } },
@@ -39,6 +46,9 @@ export default async function LeadDetailPage({
     prisma.workspace.findMany({ orderBy: { name: "asc" } }),
     prisma.tag.findMany({ orderBy: { name: "asc" } }),
     prisma.document.findMany({ where: { leadId: id }, orderBy: { createdAt: "desc" } }),
+    isAdmin(user)
+      ? prisma.user.findMany({ where: { status: "ACTIVE" }, orderBy: { name: "asc" } })
+      : Promise.resolve([]),
   ]);
   if (!lead) notFound();
   const selectedTags = new Set(lead.tags.map((t) => t.tagId));
@@ -111,8 +121,28 @@ export default async function LeadDetailPage({
                   <Label>Campaign</Label>
                   <Input name="campaign" defaultValue={lead.campaign || ""} />
                 </div>
-                <div className="space-y-1.5 sm:col-span-2">
-                  <Label>Team (optional)</Label>
+                <div className="space-y-1.5">
+                  <Label>Owner (assigned user)</Label>
+                  {isAdmin(user) ? (
+                    <Select name="assigneeId" defaultValue={lead.assigneeId || ""}>
+                      <option value="">Unassigned</option>
+                      {users.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.name} ({u.role})
+                        </option>
+                      ))}
+                    </Select>
+                  ) : (
+                    <p className="rounded-md border bg-stone-50 px-3 py-2 text-sm">
+                      {lead.assignee?.name || "Unassigned — save to claim for yourself"}
+                      {!lead.assigneeId ? (
+                        <input type="hidden" name="assigneeId" value={user.id} />
+                      ) : null}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  <Label>CRM desk (optional)</Label>
                   <Select name="workspaceId" defaultValue={lead.workspaceId || ""}>
                     <option value="">None</option>
                     {workspaces.map((w) => (

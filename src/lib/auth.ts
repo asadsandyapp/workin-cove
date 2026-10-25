@@ -68,21 +68,43 @@ export async function getCurrentUser() {
     return null;
   }
 
+  if (session.user.status === "DISABLED") {
+    return null;
+  }
+
   return session.user;
 }
 
-export async function requireAdmin() {
+export type AppUser = NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>;
+
+export async function requireUser() {
   const user = await getCurrentUser();
-  if (!user || user.role !== "ADMIN") {
+  if (!user) {
     redirect("/login");
+  }
+  return user;
+}
+
+export function isAdmin(user: { role: string }) {
+  return user.role === "ADMIN";
+}
+
+export async function requireAdmin() {
+  const user = await requireUser();
+  if (!isAdmin(user)) {
+    redirect("/");
   }
   return user;
 }
 
 export async function requireApiAdmin() {
   const user = await getCurrentUser();
-  if (!user || user.role !== "ADMIN") {
+  if (!user || !isAdmin(user)) {
     return null;
   }
   return user;
+}
+
+export async function requireApiUser() {
+  return getCurrentUser();
 }
