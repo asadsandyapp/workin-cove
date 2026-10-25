@@ -20,7 +20,7 @@ export default async function LeasesPage() {
       <PageHeader
         eyebrow="Property"
         title="Leases & rent"
-        description="Contracts between a property and a tenant. Open a lease to generate invoices and collect rent."
+        description="Start here for a new renter: New lease creates the person, tenant, and contract in one step. Open a lease later to invoice and collect rent."
         actionHref="/leases/new"
         actionLabel="New lease"
         breadcrumbs={[

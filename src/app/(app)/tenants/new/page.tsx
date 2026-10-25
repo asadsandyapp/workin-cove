@@ -1,36 +1,32 @@
-import { createTenant } from "@/app/actions/operations";
 import { prisma } from "@/lib/db";
 import { PageHeader } from "@/components/page-header";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { fullName } from "@/lib/utils";
+import { TenantForm } from "./tenant-form";
 
 export default async function NewTenantPage() {
   const contacts = await prisma.contact.findMany({
-    where: { tenant: null },
-    orderBy: { firstName: "asc" },
+    orderBy: [{ firstName: "asc" }, { lastName: "asc" }],
+    take: 200,
   });
+
   return (
-    <div className="mx-auto max-w-lg">
-      <PageHeader title="Add tenant" description="Choose an existing CRM contact." />
-      <form action={createTenant} className="space-y-4 rounded-lg border bg-white p-6">
-        <div className="space-y-1.5">
-          <Label>CRM contact</Label>
-          <Select name="contactId" required defaultValue="">
-            <option value="" disabled>
-              Select contact
-            </option>
-            {contacts.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.firstName} {c.lastName || ""} ({c.email || c.phone || "no contact info"})
-              </option>
-            ))}
-          </Select>
-        </div>
-        <Textarea name="notes" rows={3} placeholder="Notes" />
-        <Button type="submit">Create tenant</Button>
-      </form>
+    <div className="mx-auto max-w-lg space-y-4">
+      <PageHeader
+        eyebrow="Property"
+        title="Add tenant"
+        description="Usually you can skip this and use New lease instead — it creates the person automatically. Use this only if you need a tenant without a lease yet."
+        breadcrumbs={[
+          { label: "Property", href: "/property" },
+          { label: "Tenants", href: "/tenants" },
+          { label: "New" },
+        ]}
+      />
+      <TenantForm
+        contacts={contacts.map((c) => ({
+          id: c.id,
+          label: fullName(c.firstName, c.lastName),
+        }))}
+      />
     </div>
   );
 }

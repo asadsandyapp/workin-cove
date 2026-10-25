@@ -64,9 +64,40 @@ export async function createProperty(formData: FormData) {
   redirect(`/properties/${property.id}`);
 }
 
-export async function createTenant(formData: FormData) {
-  await requireAdmin();
-  const contactId = str(formData, "contactId");
+async function resolveTenantId(formData: FormData) {
+  const mode = str(formData, "tenantMode") || "new";
+  const existingTenantId = opt(formData, "tenantId");
+  if (mode === "existing" && existingTenantId) {
+    return existingTenantId;
+  }
+
+  const existingContactId = opt(formData, "contactId");
+  let contactId = existingContactId;
+
+  if (!contactId) {
+    const firstName = str(formData, "firstName");
+    if (!firstName) {
+      throw new Error("Tenant first name is required");
+    }
+    const contact = await prisma.contact.create({
+      data: {
+        firstName,
+        lastName: opt(formData, "lastName"),
+        email: opt(formData, "email"),
+        phone: opt(formData, "phone"),
+        title: opt(formData, "title"),
+        isCustomer: true,
+        notes: opt(formData, "contactNotes"),
+      },
+    });
+    contactId = contact.id;
+  }
+
+  const existingTenant = await prisma.tenant.findUnique({
+    where: { contactId },
+  });
+  if (existingTenant) return existingTenant.id;
+
   const tenant = await prisma.tenant.create({
     data: {
       contactId,
@@ -74,16 +105,58 @@ export async function createTenant(formData: FormData) {
       status: "ACTIVE",
     },
   });
+  return tenant.id;
+}
+
+export async function createTenant(formData: FormData) {
+  await requireAdmin();
+  const mode = str(formData, "tenantMode") || "new";
+  let contactId = opt(formData, "contactId");
+
+  if (mode === "new" || !contactId) {
+    const firstName = str(formData, "firstName");
+    if (!firstName) throw new Error("First name is required");
+    const contact = await prisma.contact.create({
+      data: {
+        firstName,
+        lastName: opt(formData, "lastName"),
+        email: opt(formData, "email"),
+        phone: opt(formData, "phone"),
+        isCustomer: true,
+        notes: opt(formData, "contactNotes"),
+      },
+    });
+    contactId = contact.id;
+  }
+
+  const existing = await prisma.tenant.findUnique({ where: { contactId: contactId! } });
+  if (existing) {
+    revalidatePath("/tenants");
+    redirect(`/tenants/${existing.id}`);
+  }
+
+  const tenant = await prisma.tenant.create({
+    data: {
+      contactId: contactId!,
+      notes: opt(formData, "notes"),
+      status: "ACTIVE",
+    },
+  });
   revalidatePath("/tenants");
+  revalidatePath("/contacts");
   redirect(`/tenants/${tenant.id}`);
 }
 
 export async function createLease(formData: FormData) {
-  await requireAdmin();
+  const user = await requireAdmin();
+  const propertyId = str(formData, "propertyId");
+  if (!propertyId) throw new Error("Property is required");
+
+  const tenantId = await resolveTenantId(formData);
   const lease = await prisma.lease.create({
     data: {
-      propertyId: str(formData, "propertyId"),
-      tenantId: str(formData, "tenantId"),
+      propertyId,
+      tenantId,
       status: str(formData, "status") || "ACTIVE",
       startDate: new Date(str(formData, "startDate")),
       endDate: opt(formData, "endDate") ? new Date(str(formData, "endDate")) : null,
@@ -98,7 +171,31 @@ export async function createLease(formData: FormData) {
     where: { id: lease.propertyId },
     data: { status: "OCCUPIED" },
   });
+
+  await prisma.moduleLink.create({
+    data: {
+      moduleKey: "lease",
+      moduleLabel: "Lease",
+      crmEntityType: "contact",
+      crmEntityId: (
+        await prisma.tenant.findUniqueOrThrow({
+          where: { id: tenantId },
+          select: { contactId: true },
+        })
+      ).contactId,
+      externalRef: `lease:${lease.id}`,
+      metadataJson: JSON.stringify({
+        createdBy: user.id,
+        propertyId,
+        note: "Lease wizard created contact/tenant/lease together",
+      }),
+    },
+  });
+
   revalidatePath("/leases");
+  revalidatePath("/tenants");
+  revalidatePath("/contacts");
+  revalidatePath("/properties");
   redirect(`/leases/${lease.id}`);
 }
 

@@ -15,10 +15,17 @@ export default async function TenantsPage() {
     <div>
       <PageHeader
         title="Tenants"
-        description="Tenants link to shared CRM contacts — no duplicate people records."
-        actionHref="/tenants/new"
-        actionLabel="Add tenant"
+        description="People renting your properties. Prefer New lease to add a renter in one step — this list is for looking them up later."
+        actionHref="/leases/new"
+        actionLabel="New lease"
       />
+      <p className="mb-4 text-sm text-slate-500">
+        Need a tenant record without a lease yet?{" "}
+        <Link href="/tenants/new" className="text-teal-800 underline">
+          Add tenant only
+        </Link>
+        .
+      </p>
       <div className="overflow-hidden rounded-lg border bg-white">
         <table className="min-w-full text-sm">
           <thead className="bg-stone-50 text-left text-stone-500">

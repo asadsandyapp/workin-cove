@@ -6,13 +6,13 @@ export default function PropertyHubPage() {
   return (
     <ModuleHub
       group={group}
-      firstActionHref="/properties"
-      firstActionLabel="Go to Properties"
+      firstActionHref="/leases/new"
+      firstActionLabel="New lease"
       howToUse={[
         "Add company-owned Properties first (inventory).",
-        "Create a Tenant from an existing CRM Contact.",
-        "Create a Lease linking a property + tenant, then generate rent invoices.",
-        "Collect rent in Leases — partial payments stay PARTIAL until balance is zero.",
+        "Use New lease — one form creates the person, tenant, and lease together (no Contact → Tenant → Lease chain).",
+        "Open the lease to generate the first rent invoice, then collect payments there.",
+        "Partial payments stay PARTIAL until the invoice balance is zero.",
       ]}
     />
   );

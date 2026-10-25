@@ -83,12 +83,12 @@ export const NAV_GROUPS: NavGroup[] = [
       {
         href: "/tenants",
         label: "Tenants",
-        blurb: "Renters linked to CRM contacts",
+        blurb: "Renters (usually created via New lease)",
       },
       {
         href: "/leases",
         label: "Leases & rent",
-        blurb: "Contracts, invoices, and collections",
+        blurb: "Start here: one form for person + contract + rent",
       },
     ],
   },
