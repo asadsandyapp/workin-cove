@@ -23,7 +23,7 @@ export default async function LoginPage({
         </p>
         <LoginForm nextPath={params.next || "/"} error={params.error} />
         <p className="mt-6 text-xs text-stone-500">
-          Demo: admin@workincove.local / admin123
+          Demo: admin@workincove.local / 1122
         </p>
       </div>
     </div>

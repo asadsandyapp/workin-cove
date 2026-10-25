@@ -85,7 +85,7 @@ async function main() {
     await prisma.account.create({ data: a });
   }
 
-  const passwordHash = await bcrypt.hash("admin123", 10);
+  const passwordHash = await bcrypt.hash("1122", 10);
   const admin = await prisma.user.create({
     data: {
       email: "admin@workincove.local",
@@ -778,7 +778,7 @@ async function main() {
   });
 
   console.log("Seeded Workin Cove demo data");
-  console.log("Admin login: admin@workincove.local / admin123");
+  console.log("Admin login: admin@workincove.local / 1122");
 }
 
 main()

@@ -58,7 +58,7 @@ export function LoginForm({
           id="password"
           name="password"
           type="password"
-          defaultValue="admin123"
+          defaultValue="1122"
           required
         />
       </div>

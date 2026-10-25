@@ -11,7 +11,7 @@ npm run dev -- --port 43127
 ```
 
 Open http://127.0.0.1:43127  
-Login: `admin@workincove.local` / `admin123`
+Login: `admin@workincove.local` / `1122`
 
 ## Environment
 

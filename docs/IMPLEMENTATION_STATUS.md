@@ -6,7 +6,7 @@ Updated: 2026-10-25
 `cursor/workin-cove-crm-40fd`
 
 ## What works
-- Admin auth (`admin@workincove.local` / `admin123`)
+- Admin auth (`admin@workincove.local` / `1122`)
 - CRM: workspaces, leads (CRUD/convert), contacts, companies, deals (Kanban/table), tasks (8 views), activities, tags, custom fields, documents, dashboard
 - Lead import CSV/Excel with preview/mapping/validation/duplicates
 - Meta + Google Ads webhooks (toggle in Settings)

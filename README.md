@@ -13,7 +13,7 @@ npm run dev -- --hostname 127.0.0.1 --port 43127
 ```
 
 - App: [http://127.0.0.1:43127](http://127.0.0.1:43127)
-- Admin: `admin@workincove.local` / `admin123`
+- Admin: `admin@workincove.local` / `1122`
 
 ## Scripts
 
