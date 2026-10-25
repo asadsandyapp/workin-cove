@@ -45,10 +45,15 @@ export default async function LeadsPage({
   return (
     <div>
       <PageHeader
+        eyebrow="CRM"
         title="Leads"
-        description="Manual, imported, and integration-sourced inquiries."
+        description="Manual, imported, and integration-sourced inquiries with attribution."
         actionHref="/leads/new"
         actionLabel="New lead"
+        breadcrumbs={[
+          { label: "CRM", href: "/leads" },
+          { label: "Leads" },
+        ]}
       />
       <div className="mb-4 flex flex-wrap gap-2">
         <Link href="/leads/import" className="rounded-md border px-3 py-1.5 text-sm hover:bg-white">
