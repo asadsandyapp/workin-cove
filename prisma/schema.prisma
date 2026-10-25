@@ -1,0 +1,696 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         String   @default("ADMIN")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sessions       Session[]
+  assignedLeads  Lead[]            @relation("LeadAssignee")
+  assignedTasks  Task[]            @relation("TaskAssignee")
+  activities     Activity[]
+  notes          Note[]
+  documents      Document[]
+  stageChanges   DealStageHistory[]
+  taskReschedules TaskReschedule[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model AppSettings {
+  id                      String  @id @default("default")
+  companyName             String  @default("Workin Cove")
+  businessTimezone        String  @default("Asia/Karachi")
+  baseCurrency            String  @default("PKR")
+  dateFormat              String  @default("dd MMM yyyy")
+  metaWebhookEnabled      Boolean @default(true)
+  metaVerifyToken         String  @default("workin-cove-meta-verify")
+  googleAdsWebhookEnabled Boolean @default(true)
+  googleAdsSharedSecret   String  @default("workin-cove-google-secret")
+}
+
+model Workspace {
+  id          String   @id @default(cuid())
+  name        String
+  code        String?  @unique
+  description String?
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  leads      Lead[]
+  contacts   Contact[]
+  companies  Company[]
+  deals      Deal[]
+  tasks      Task[]
+  activities Activity[]
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  color     String   @default("#0f766e")
+  createdAt DateTime @default(now())
+
+  leads     LeadTag[]
+  contacts  ContactTag[]
+  companies CompanyTag[]
+  deals     DealTag[]
+}
+
+model CustomFieldDefinition {
+  id         String   @id @default(cuid())
+  entityType String
+  key        String
+  label      String
+  fieldType  String
+  optionsJson String?
+  required   Boolean  @default(false)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([entityType, key])
+}
+
+model Lead {
+  id               String    @id @default(cuid())
+  firstName        String
+  lastName         String?
+  email            String?
+  phone            String?
+  companyName      String?
+  title            String?
+  status           String    @default("NEW")
+  source           String    @default("MANUAL")
+  campaign         String?
+  externalRef      String?
+  attributionJson  String?
+  notes            String?
+  customFieldsJson String?
+  workspaceId      String?
+  workspace        Workspace? @relation(fields: [workspaceId], references: [id])
+  assigneeId       String?
+  assignee         User?     @relation("LeadAssignee", fields: [assigneeId], references: [id])
+  convertedContactId String? @unique
+  convertedContact Contact?  @relation("LeadConvertedContact", fields: [convertedContactId], references: [id])
+  convertedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  tags       LeadTag[]
+  deals      Deal[]
+  tasks      Task[]
+  activities Activity[]
+  notesList  Note[]
+  documents  Document[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([status])
+  @@index([source])
+}
+
+model LeadTag {
+  leadId String
+  tagId  String
+  lead   Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([leadId, tagId])
+}
+
+model Company {
+  id               String   @id @default(cuid())
+  name             String
+  website          String?
+  email            String?
+  phone            String?
+  industry         String?
+  address          String?
+  notes            String?
+  customFieldsJson String?
+  workspaceId      String?
+  workspace        Workspace? @relation(fields: [workspaceId], references: [id])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  contacts   Contact[]
+  deals      Deal[]
+  tasks      Task[]
+  activities Activity[]
+  notesList  Note[]
+  documents  Document[]
+  tags       CompanyTag[]
+}
+
+model CompanyTag {
+  companyId String
+  tagId     String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([companyId, tagId])
+}
+
+model Contact {
+  id               String   @id @default(cuid())
+  firstName        String
+  lastName         String?
+  email            String?
+  phone            String?
+  title            String?
+  notes            String?
+  customFieldsJson String?
+  isCustomer       Boolean  @default(false)
+  companyId        String?
+  company          Company? @relation(fields: [companyId], references: [id])
+  workspaceId      String?
+  workspace        Workspace? @relation(fields: [workspaceId], references: [id])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  convertedFromLead Lead?     @relation("LeadConvertedContact")
+  deals             Deal[]
+  tasks             Task[]
+  activities        Activity[]
+  notesList         Note[]
+  documents         Document[]
+  tags              ContactTag[]
+  tenant            Tenant?
+  propertyTransactions PropertyTransaction[]
+
+  @@index([email])
+  @@index([phone])
+}
+
+model ContactTag {
+  contactId String
+  tagId     String
+  contact   Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([contactId, tagId])
+}
+
+model Pipeline {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  stages Stage[]
+  deals  Deal[]
+}
+
+model Stage {
+  id           String   @id @default(cuid())
+  pipelineId   String
+  pipeline     Pipeline @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  name         String
+  sortOrder    Int
+  probability  Int      @default(0)
+  isWon        Boolean  @default(false)
+  isLost       Boolean  @default(false)
+  color        String   @default("#64748b")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  deals Deal[]
+  historyFrom DealStageHistory[] @relation("FromStage")
+  historyTo   DealStageHistory[] @relation("ToStage")
+}
+
+model Deal {
+  id               String    @id @default(cuid())
+  title            String
+  value            Float     @default(0)
+  currency         String    @default("PKR")
+  expectedCloseDate DateTime?
+  nextAction       String?
+  status           String    @default("OPEN")
+  lossReason       String?
+  probability      Int?
+  customFieldsJson String?
+  pipelineId       String
+  pipeline         Pipeline  @relation(fields: [pipelineId], references: [id])
+  stageId          String
+  stage            Stage     @relation(fields: [stageId], references: [id])
+  leadId           String?
+  lead             Lead?     @relation(fields: [leadId], references: [id])
+  contactId        String?
+  contact          Contact?  @relation(fields: [contactId], references: [id])
+  companyId        String?
+  company          Company?  @relation(fields: [companyId], references: [id])
+  workspaceId      String?
+  workspace        Workspace? @relation(fields: [workspaceId], references: [id])
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  stageHistory DealStageHistory[]
+  tasks        Task[]
+  activities   Activity[]
+  notesList    Note[]
+  documents    Document[]
+  tags         DealTag[]
+
+  @@index([status])
+  @@index([stageId])
+}
+
+model DealTag {
+  dealId String
+  tagId  String
+  deal   Deal @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([dealId, tagId])
+}
+
+model DealStageHistory {
+  id         String   @id @default(cuid())
+  dealId     String
+  deal       Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  fromStageId String?
+  fromStage  Stage?   @relation("FromStage", fields: [fromStageId], references: [id])
+  toStageId  String
+  toStage    Stage    @relation("ToStage", fields: [toStageId], references: [id])
+  changedById String?
+  changedBy  User?    @relation(fields: [changedById], references: [id])
+  note       String?
+  createdAt  DateTime @default(now())
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  type        String    @default("FOLLOW_UP")
+  status      String    @default("OPEN")
+  priority    String    @default("MEDIUM")
+  dueAt       DateTime?
+  completedAt DateTime?
+  outcome     String?
+  reminderAt  DateTime?
+  leadId      String?
+  lead        Lead?     @relation(fields: [leadId], references: [id])
+  contactId   String?
+  contact     Contact?  @relation(fields: [contactId], references: [id])
+  companyId   String?
+  company     Company?  @relation(fields: [companyId], references: [id])
+  dealId      String?
+  deal        Deal?     @relation(fields: [dealId], references: [id])
+  workspaceId String?
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id])
+  assigneeId  String?
+  assignee    User?     @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  automationKey String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  reschedules TaskReschedule[]
+  activities  Activity[]
+
+  @@unique([automationKey])
+  @@index([status])
+  @@index([dueAt])
+}
+
+model TaskReschedule {
+  id          String   @id @default(cuid())
+  taskId      String
+  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  previousDue DateTime?
+  newDue      DateTime?
+  reason      String?
+  changedById String?
+  changedBy   User?    @relation(fields: [changedById], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  type        String
+  summary     String
+  body        String?
+  leadId      String?
+  lead        Lead?    @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  contactId   String?
+  contact     Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  companyId   String?
+  company     Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  dealId      String?
+  deal        Deal?    @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  taskId      String?
+  task        Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  workspaceId String?
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id])
+  createdById String?
+  createdBy   User?    @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  body      String
+  leadId    String?
+  lead      Lead?    @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  contactId String?
+  contact   Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  dealId    String?
+  deal      Deal?    @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  createdById String?
+  createdBy User?    @relation(fields: [createdById], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Document {
+  id           String   @id @default(cuid())
+  filename     String
+  originalName String
+  mimeType     String?
+  sizeBytes    Int
+  storagePath  String
+  leadId       String?
+  lead         Lead?    @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  contactId    String?
+  contact      Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  companyId    String?
+  company      Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  dealId       String?
+  deal         Deal?    @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  propertyId   String?
+  property     Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  expenseId    String?
+  expense      Expense? @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  leaseId      String?
+  lease        Lease?   @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  uploadedById String?
+  uploadedBy   User?    @relation(fields: [uploadedById], references: [id])
+  createdAt    DateTime @default(now())
+}
+
+model ModuleLink {
+  id            String   @id @default(cuid())
+  moduleKey     String
+  moduleLabel   String
+  externalRef   String?
+  crmEntityType String
+  crmEntityId   String
+  metadataJson  String?
+  createdAt     DateTime @default(now())
+
+  @@index([crmEntityType, crmEntityId])
+  @@index([moduleKey])
+}
+
+model ImportJob {
+  id             String    @id @default(cuid())
+  filename       String
+  status         String    @default("PREVIEW")
+  totalRows      Int       @default(0)
+  successCount   Int       @default(0)
+  errorCount     Int       @default(0)
+  duplicateCount Int       @default(0)
+  mappingJson    String?
+  errorsJson     String?
+  summaryJson    String?
+  createdAt      DateTime  @default(now())
+  completedAt    DateTime?
+}
+
+model AuditEvent {
+  id         String   @id @default(cuid())
+  entityType String
+  entityId   String
+  action     String
+  summary    String
+  metaJson   String?
+  actorId    String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+/// Money fields use integer minor units (paisa/cents). Never floating point.
+model Property {
+  id              String    @id @default(cuid())
+  code            String?   @unique
+  name            String
+  addressLine1    String
+  addressLine2    String?
+  city            String?
+  area            String?
+  propertyType    String    @default("COMMERCIAL")
+  sizeSqFt        Float?
+  status          String    @default("AVAILABLE")
+  acquisitionDate DateTime?
+  acquisitionCostMinor            BigInt  @default(0)
+  attributesJson  String?
+  notes           String?
+  archivedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  leases       Lease[]
+  expenses     Expense[]
+  workOrders   WorkOrder[]
+  transactions PropertyTransaction[]
+  documents    Document[]
+  rentInvoices RentInvoice[]
+}
+
+model Tenant {
+  id        String   @id @default(cuid())
+  contactId String   @unique
+  contact   Contact  @relation(fields: [contactId], references: [id])
+  status    String   @default("ACTIVE")
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  leases Lease[]
+}
+
+model Lease {
+  id                 String    @id @default(cuid())
+  propertyId         String
+  property           Property  @relation(fields: [propertyId], references: [id])
+  tenantId           String
+  tenant             Tenant    @relation(fields: [tenantId], references: [id])
+  status             String    @default("DRAFT")
+  startDate          DateTime
+  endDate            DateTime?
+  rentAmountMinor            BigInt
+  currency           String    @default("PKR")
+  billingCycle       String    @default("MONTHLY")
+  dueDayOfMonth      Int       @default(1)
+  securityDepositMinor            BigInt     @default(0)
+  escalationPercent  Float     @default(0)
+  escalationEveryMonths Int    @default(12)
+  notes              String?
+  archivedAt         DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  escalations  RentEscalation[]
+  invoices     RentInvoice[]
+  documents    Document[]
+  workOrders   WorkOrder[]
+}
+
+model RentEscalation {
+  id              String   @id @default(cuid())
+  leaseId         String
+  lease           Lease    @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  effectiveDate   DateTime
+  previousRentMinor            BigInt
+  newRentMinor            BigInt
+  percent         Float?
+  note            String?
+  createdAt       DateTime @default(now())
+}
+
+model RentInvoice {
+  id              String    @id @default(cuid())
+  leaseId         String
+  lease           Lease     @relation(fields: [leaseId], references: [id])
+  propertyId      String
+  property        Property  @relation(fields: [propertyId], references: [id])
+  periodStart     DateTime
+  periodEnd       DateTime
+  dueDate         DateTime
+  amountMinor            BigInt
+  balanceMinor            BigInt
+  status          String    @default("OPEN")
+  idempotencyKey  String?   @unique
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  payments RentPayment[]
+}
+
+model RentPayment {
+  id               String   @id @default(cuid())
+  invoiceId        String
+  invoice          RentInvoice @relation(fields: [invoiceId], references: [id])
+  amountMinor            BigInt
+  paidAt           DateTime @default(now())
+  method           String   @default("BANK")
+  reference        String?
+  isReversal       Boolean  @default(false)
+  reversesPaymentId String?
+  journalEntryId   String?
+  journalEntry     JournalEntry? @relation(fields: [journalEntryId], references: [id])
+  idempotencyKey   String?  @unique
+  notes            String?
+  createdAt        DateTime @default(now())
+}
+
+model ExpenseCategory {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  expenses  Expense[]
+}
+
+model Vendor {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  notes     String?
+  createdAt DateTime @default(now())
+  expenses  Expense[]
+  workOrders WorkOrder[]
+}
+
+model Expense {
+  id              String   @id @default(cuid())
+  title           String
+  categoryId      String?
+  category        ExpenseCategory? @relation(fields: [categoryId], references: [id])
+  vendorId        String?
+  vendor          Vendor?  @relation(fields: [vendorId], references: [id])
+  propertyId      String?
+  property        Property? @relation(fields: [propertyId], references: [id])
+  amountMinor            BigInt
+  currency        String   @default("PKR")
+  incurredOn      DateTime @default(now())
+  status          String   @default("RECORDED")
+  isRecurring     Boolean  @default(false)
+  recurrenceRule  String?
+  notes           String?
+  journalEntryId  String?
+  journalEntry    JournalEntry? @relation(fields: [journalEntryId], references: [id])
+  archivedAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  documents Document[]
+}
+
+model WorkOrder {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  status      String    @default("OPEN")
+  priority    String    @default("MEDIUM")
+  propertyId  String?
+  property    Property? @relation(fields: [propertyId], references: [id])
+  leaseId     String?
+  lease       Lease?    @relation(fields: [leaseId], references: [id])
+  vendorId    String?
+  vendor      Vendor?   @relation(fields: [vendorId], references: [id])
+  dueAt       DateTime?
+  completedAt DateTime?
+  costMinor            BigInt       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model PropertyTransaction {
+  id              String    @id @default(cuid())
+  type            String
+  propertyId      String
+  property        Property  @relation(fields: [propertyId], references: [id])
+  counterpartyContactId String?
+  counterpartyContact Contact? @relation(fields: [counterpartyContactId], references: [id])
+  dealId          String?
+  status          String    @default("DRAFT")
+  agreedAmountMinor            BigInt     @default(0)
+  feesMinor            BigInt       @default(0)
+  taxesMinor            BigInt       @default(0)
+  closingDate     DateTime?
+  milestonesJson  String?
+  notes           String?
+  journalEntryId  String?
+  journalEntry    JournalEntry? @relation(fields: [journalEntryId], references: [id])
+  archivedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Account {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  type      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  lines     JournalLine[]
+}
+
+model JournalEntry {
+  id             String   @id @default(cuid())
+  entryDate      DateTime @default(now())
+  memo           String?
+  sourceType     String?
+  sourceId       String?
+  idempotencyKey String?  @unique
+  postedAt       DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  lines               JournalLine[]
+  rentPayments        RentPayment[]
+  expenses            Expense[]
+  propertyTransactions PropertyTransaction[]
+}
+
+model JournalLine {
+  id            String       @id @default(cuid())
+  entryId       String
+  entry         JournalEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  accountId     String
+  account       Account      @relation(fields: [accountId], references: [id])
+  debitMinor            BigInt          @default(0)
+  creditMinor            BigInt          @default(0)
+  memo          String?
+}
+
