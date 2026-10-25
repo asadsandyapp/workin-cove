@@ -47,11 +47,11 @@ export default async function LeadsPage({
       <PageHeader
         eyebrow="CRM"
         title="Leads"
-        description="Manual, imported, and integration-sourced inquiries with attribution."
+        description="New inquiries before they become customers. Create manually, import a spreadsheet, or receive Meta/Google Ads webhooks."
         actionHref="/leads/new"
         actionLabel="New lead"
         breadcrumbs={[
-          { label: "CRM", href: "/leads" },
+          { label: "CRM", href: "/crm" },
           { label: "Leads" },
         ]}
       />

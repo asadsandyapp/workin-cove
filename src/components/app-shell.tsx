@@ -2,18 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
 import {
   Building2,
   Calculator,
   CheckSquare,
-  ChevronDown,
   ContactRound,
   FileBarChart2,
-  Gauge,
   Handshake,
-  LayoutDashboard,
-  Puzzle,
+  Home,
   Search,
   Settings,
   Tags,
@@ -21,79 +17,38 @@ import {
   Wrench,
   Workflow,
 } from "lucide-react";
+import { NAV_GROUPS, TOP_NAV, findGroupForPath } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
-type NavItem = {
-  href: string;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
+const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  "/": Home,
+  "/reports": FileBarChart2,
+  "/workspaces": Building2,
+  "/leads": Users,
+  "/contacts": ContactRound,
+  "/companies": Handshake,
+  "/deals": Workflow,
+  "/tasks": CheckSquare,
+  "/search": Search,
+  "/properties": Building2,
+  "/tenants": Users,
+  "/leases": Handshake,
+  "/expenses": Tags,
+  "/maintenance": Wrench,
+  "/transactions": Workflow,
+  "/accounting": Calculator,
+  "/settings": Settings,
+  "/modules": Workflow,
+  "/crm": Users,
+  "/property": Building2,
+  "/operations": Wrench,
+  "/finance": Calculator,
+  "/admin": Settings,
 };
 
-type NavGroup = {
-  id: string;
-  label: string;
-  items: NavItem[];
-};
-
-const TOP_ITEMS: NavItem[] = [
-  { href: "/", label: "Executive dashboard", icon: LayoutDashboard },
-  { href: "/reports", label: "Reports", icon: FileBarChart2 },
-];
-
-const NAV_GROUPS: NavGroup[] = [
-  {
-    id: "crm",
-    label: "CRM",
-    items: [
-      { href: "/workspaces", label: "Workspaces", icon: Building2 },
-      { href: "/leads", label: "Leads", icon: Users },
-      { href: "/contacts", label: "Contacts", icon: ContactRound },
-      { href: "/companies", label: "Companies", icon: Handshake },
-      { href: "/deals", label: "Deals & pipeline", icon: Workflow },
-      { href: "/tasks", label: "Tasks & follow-ups", icon: CheckSquare },
-      { href: "/search", label: "Global search", icon: Search },
-    ],
-  },
-  {
-    id: "property",
-    label: "Property & rental",
-    items: [
-      { href: "/properties", label: "Property inventory", icon: Building2 },
-      { href: "/tenants", label: "Tenants", icon: Users },
-      { href: "/leases", label: "Leases & rent", icon: Handshake },
-    ],
-  },
-  {
-    id: "operations",
-    label: "Operations",
-    items: [
-      { href: "/expenses", label: "Expenses", icon: Tags },
-      { href: "/maintenance", label: "Maintenance", icon: Wrench },
-      { href: "/transactions", label: "Sales & purchases", icon: Workflow },
-    ],
-  },
-  {
-    id: "finance",
-    label: "Finance",
-    items: [{ href: "/accounting", label: "Accounting & ledger", icon: Calculator }],
-  },
-  {
-    id: "admin",
-    label: "Administration",
-    items: [
-      { href: "/settings", label: "Settings", icon: Settings },
-      { href: "/modules", label: "Module links", icon: Puzzle },
-    ],
-  },
-];
-
-function pathActive(pathname: string, href: string) {
+function isActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(`${href}/`);
-}
-
-function groupContainsPath(group: NavGroup, pathname: string) {
-  return group.items.some((item) => pathActive(pathname, item.href));
 }
 
 export function AppShell({
@@ -106,126 +61,107 @@ export function AppShell({
   userName: string;
 }) {
   const pathname = usePathname();
-  const initialOpen = useMemo(() => {
-    const open: Record<string, boolean> = {};
-    for (const group of NAV_GROUPS) {
-      open[group.id] = groupContainsPath(group, pathname);
-    }
-    if (!Object.values(open).some(Boolean)) open.crm = true;
-    return open;
-  }, [pathname]);
-  const [openGroups, setOpenGroups] = useState(initialOpen);
-
-  useEffect(() => {
-    setOpenGroups((prev) => {
-      const next = { ...prev };
-      for (const group of NAV_GROUPS) {
-        if (groupContainsPath(group, pathname)) next[group.id] = true;
-      }
-      return next;
-    });
-  }, [pathname]);
-
-  function toggleGroup(id: string) {
-    setOpenGroups((prev) => ({ ...prev, [id]: !prev[id] }));
-  }
+  const activeGroup = findGroupForPath(pathname);
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#f4f7f8_0%,#eef2f4_40%,#f8fafb_100%)]">
-      <div className="mx-auto flex min-h-screen max-w-[1600px]">
-        <aside className="hidden w-72 shrink-0 border-r border-slate-200 bg-slate-950 text-slate-100 md:flex md:flex-col">
+    <div className="min-h-screen bg-[#f1f5f9] text-slate-900">
+      <div className="flex min-h-screen">
+        <aside className="hidden w-[280px] shrink-0 flex-col border-r border-slate-800 bg-[#0b1220] text-slate-200 lg:flex">
           <div className="border-b border-white/10 px-5 py-5">
-            <p className="font-display text-xl font-semibold tracking-tight text-white">
+            <p className="text-lg font-semibold tracking-tight text-white">
               {companyName}
             </p>
-            <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-teal-300/90">
-              Enterprise operations
+            <p className="mt-1 text-xs text-slate-400">
+              Business management · single company
             </p>
           </div>
 
-          <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
-            <div className="space-y-1">
-              {TOP_ITEMS.map((item) => {
-                const active = pathActive(pathname, item.href);
-                const Icon = item.icon;
+          <div className="flex-1 overflow-y-auto px-3 py-4">
+            <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+              Start here
+            </p>
+            <div className="mb-5 space-y-0.5">
+              {TOP_NAV.map((item) => {
+                const Icon = ICONS[item.href] || Home;
+                const active = isActive(pathname, item.href);
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors",
+                      "flex items-start gap-3 rounded-md px-2.5 py-2 transition",
                       active
-                        ? "bg-teal-600 text-white shadow-sm"
-                        : "text-slate-300 hover:bg-white/5 hover:text-white",
+                        ? "bg-teal-600 text-white"
+                        : "hover:bg-white/5",
                     )}
                   >
-                    <Icon className="h-4 w-4 shrink-0" />
-                    {item.label}
+                    <Icon className="mt-0.5 h-4 w-4 shrink-0" />
+                    <span>
+                      <span className="block text-sm font-medium">{item.label}</span>
+                      <span
+                        className={cn(
+                          "block text-[11px] leading-snug",
+                          active ? "text-teal-50/90" : "text-slate-500",
+                        )}
+                      >
+                        {item.blurb}
+                      </span>
+                    </span>
                   </Link>
                 );
               })}
             </div>
 
             {NAV_GROUPS.map((group) => {
-              const open = openGroups[group.id];
-              const sectionActive = groupContainsPath(group, pathname);
+              const groupActive = activeGroup?.id === group.id;
               return (
-                <div key={group.id}>
-                  <button
-                    type="button"
-                    onClick={() => toggleGroup(group.id)}
+                <div key={group.id} className="mb-5">
+                  <Link
+                    href={group.href}
                     className={cn(
-                      "flex w-full items-center justify-between rounded-md px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em]",
-                      sectionActive ? "text-teal-300" : "text-slate-400 hover:text-slate-200",
+                      "mb-1 flex items-center justify-between rounded-md px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em]",
+                      groupActive
+                        ? "bg-white/10 text-teal-300"
+                        : "text-slate-500 hover:bg-white/5 hover:text-slate-300",
                     )}
                   >
                     <span>{group.label}</span>
-                    <ChevronDown
-                      className={cn(
-                        "h-3.5 w-3.5 transition-transform",
-                        open ? "rotate-0" : "-rotate-90",
-                      )}
-                    />
-                  </button>
-                  {open ? (
-                    <div className="mt-1 space-y-0.5">
-                      {group.items.map((item) => {
-                        const active = pathActive(pathname, item.href);
-                        const Icon = item.icon;
-                        return (
-                          <Link
-                            key={item.href}
-                            href={item.href}
-                            className={cn(
-                              "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors",
-                              active
-                                ? "bg-teal-600 text-white"
-                                : "text-slate-300 hover:bg-white/5 hover:text-white",
-                            )}
-                          >
-                            <Icon className="h-4 w-4 shrink-0 opacity-80" />
-                            {item.label}
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  ) : null}
+                    <span className="normal-case tracking-normal text-[10px] font-normal text-slate-500">
+                      overview
+                    </span>
+                  </Link>
+                  <div className="space-y-0.5 border-l border-white/10 ml-3 pl-2">
+                    {group.items.map((item) => {
+                      const Icon = ICONS[item.href] || Home;
+                      const active = isActive(pathname, item.href);
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          title={item.blurb}
+                          className={cn(
+                            "flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition",
+                            active
+                              ? "bg-teal-600 font-medium text-white"
+                              : "text-slate-300 hover:bg-white/5 hover:text-white",
+                          )}
+                        >
+                          <Icon className="h-3.5 w-3.5 shrink-0 opacity-80" />
+                          {item.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
                 </div>
               );
             })}
-          </nav>
+          </div>
 
-          <div className="border-t border-white/10 p-4 text-xs text-slate-400">
-            <div className="flex items-center gap-2 font-medium text-slate-200">
-              <Gauge className="h-3.5 w-3.5 text-teal-300" />
-              {userName}
-            </div>
-            <p className="mt-1">Administrator</p>
+          <div className="border-t border-white/10 px-4 py-4 text-xs text-slate-400">
+            <p className="font-medium text-slate-200">{userName}</p>
+            <p className="mt-0.5">Admin</p>
             <form action="/api/auth/logout" method="post" className="mt-3">
-              <button
-                type="submit"
-                className="text-teal-300 underline-offset-2 hover:underline"
-              >
+              <button type="submit" className="text-teal-300 hover:underline">
                 Sign out
               </button>
             </form>
@@ -233,41 +169,50 @@ export function AppShell({
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/90 backdrop-blur">
-            <div className="flex items-center justify-between px-4 py-3 md:px-8">
-              <div>
-                <p className="font-display text-lg font-semibold text-slate-900 md:hidden">
+          <header className="sticky top-0 z-20 border-b border-slate-200 bg-white">
+            <div className="flex items-center justify-between gap-4 px-4 py-3 lg:px-8">
+              <div className="min-w-0">
+                <p className="truncate text-base font-semibold text-slate-900 lg:hidden">
                   {companyName}
                 </p>
-                <p className="hidden text-xs uppercase tracking-[0.14em] text-slate-500 md:block">
-                  Workin Cove control center
+                <p className="hidden text-sm text-slate-600 lg:block">
+                  {activeGroup
+                    ? `${activeGroup.label}: ${activeGroup.blurb}`
+                    : "Choose a module from the left. Each group has an Overview page that explains what to do."}
                 </p>
               </div>
-              <div className="flex items-center gap-2 text-xs text-slate-500">
-                <span className="rounded-full bg-emerald-50 px-2.5 py-1 font-medium text-emerald-800">
-                  Live data
+              <div className="flex shrink-0 items-center gap-2">
+                <Link
+                  href="/search"
+                  className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+                >
+                  Search
+                </Link>
+                <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs text-slate-600">
+                  {userName}
                 </span>
-                <span className="hidden sm:inline">{userName}</span>
               </div>
             </div>
-            <div className="flex gap-2 overflow-x-auto border-t border-slate-100 px-3 py-2 md:hidden">
-              {[...TOP_ITEMS, ...NAV_GROUPS.flatMap((g) => g.items)].map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs",
-                    pathActive(pathname, item.href)
-                      ? "bg-slate-900 text-white"
-                      : "bg-slate-100 text-slate-700",
-                  )}
-                >
-                  {item.label}
-                </Link>
-              ))}
+            <div className="flex gap-1.5 overflow-x-auto border-t border-slate-100 px-3 py-2 lg:hidden">
+              {[...TOP_NAV, ...NAV_GROUPS.flatMap((g) => [ { href: g.href, label: g.label, blurb: g.blurb }, ...g.items ])].map(
+                (item) => (
+                  <Link
+                    key={`${item.href}-${item.label}`}
+                    href={item.href}
+                    className={cn(
+                      "whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs",
+                      isActive(pathname, item.href)
+                        ? "bg-slate-900 text-white"
+                        : "bg-slate-100 text-slate-700",
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                ),
+              )}
             </div>
           </header>
-          <main className="flex-1 p-4 md:p-8">{children}</main>
+          <main className="flex-1 px-4 py-5 lg:px-8 lg:py-7">{children}</main>
         </div>
       </div>
     </div>

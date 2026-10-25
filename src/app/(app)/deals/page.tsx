@@ -45,10 +45,15 @@ export default async function DealsPage({
   return (
     <div>
       <PageHeader
+        eyebrow="CRM"
         title="Deals"
-        description="Configurable pipelines with Kanban and table views."
+        description="Sales opportunities. Drag/move stages on Kanban, or use Table. Lost deals ask for a loss reason."
         actionHref="/deals/new"
         actionLabel="New deal"
+        breadcrumbs={[
+          { label: "CRM", href: "/crm" },
+          { label: "Deals" },
+        ]}
       />
       <div className="mb-4 flex flex-wrap gap-2">
         {pipelines.map((p) => (

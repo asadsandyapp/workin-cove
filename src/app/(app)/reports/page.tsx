@@ -68,9 +68,8 @@ export default async function ReportsPage() {
   return (
     <div className="space-y-8">
       <PageHeader
-        eyebrow="Analytics"
-        title="Enterprise reports"
-        description="Operational and financial summaries from live records. Every figure links into filtered modules."
+        title="Reports"
+        description="Read-only breakdowns from live data. Click any bar or row to jump into the matching filtered list."
         breadcrumbs={[
           { label: "Home", href: "/" },
           { label: "Reports" },

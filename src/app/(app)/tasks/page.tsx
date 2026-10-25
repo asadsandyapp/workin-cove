@@ -54,8 +54,13 @@ export default async function TasksPage({
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="CRM"
         title="Tasks & follow-ups"
-        description={`Timezone-aware views (${tz}).`}
+        description={`Work you must do: calls, meetings, emails, reminders. Views use business timezone (${tz}). Start with Overdue, then Today.`}
+        breadcrumbs={[
+          { label: "CRM", href: "/crm" },
+          { label: "Tasks" },
+        ]}
       />
       <div className="flex flex-wrap gap-2">
         {VIEWS.map((v) => (

@@ -18,10 +18,15 @@ export default async function LeasesPage() {
   return (
     <div>
       <PageHeader
-        title="Leases"
-        description="Lease terms, rent schedules, escalations, and collection."
+        eyebrow="Property"
+        title="Leases & rent"
+        description="Contracts between a property and a tenant. Open a lease to generate invoices and collect rent."
         actionHref="/leases/new"
         actionLabel="New lease"
+        breadcrumbs={[
+          { label: "Property", href: "/property" },
+          { label: "Leases" },
+        ]}
       />
       <div className="overflow-hidden rounded-lg border bg-white">
         <table className="min-w-full text-sm">

@@ -14,10 +14,15 @@ export default async function PropertiesPage() {
   return (
     <div>
       <PageHeader
+        eyebrow="Property"
         title="Property inventory"
-        description="Company-owned portfolio. Workspaces remain operational contexts, not properties."
+        description="Buildings and units the company owns. This is separate from CRM Workspaces (those are teams/offices for filtering)."
         actionHref="/properties/new"
         actionLabel="Add property"
+        breadcrumbs={[
+          { label: "Property", href: "/property" },
+          { label: "Properties" },
+        ]}
       />
       <div className="overflow-hidden rounded-lg border bg-white">
         <table className="min-w-full text-sm">
